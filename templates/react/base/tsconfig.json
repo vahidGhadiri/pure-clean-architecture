@@ -19,7 +19,7 @@
     "baseUrl": ".",
     "paths": {
       "@shared_kernel/*": ["./src/shared_kernel/*"],
-      "@modules/*": ["src/core/*"],
+      "@core/*": ["src/core/*"],
       "@adapters/*": ["./src/adapters/*"],
       "@features/*": ["./src/features/*"]
     }
