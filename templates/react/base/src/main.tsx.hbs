@@ -3,16 +3,26 @@ import { createRoot } from "react-dom/client";
 {{#if tanstackQuery}}
 import { QueryProvider } from "./providers/QueryProvider";
 {{/if}}
+{{#if redux}}
+import { store } from "./store";
+import { Provider } from "react-redux";
+{{/if}}
 import { App } from "./App";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
+    {{#if redux}}
+    <Provider store={store}>
+    {{/if}}
     {{#if tanstackQuery}}
     <QueryProvider>
+    {{/if}}
       <App />
+    {{#if tanstackQuery}}
     </QueryProvider>
-    {{else}}
-    <App />
+    {{/if}}
+    {{#if redux}}
+    </Provider>
     {{/if}}
   </StrictMode>,
 );
