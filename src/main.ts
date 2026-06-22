@@ -24,11 +24,11 @@ program.addCommand(createUpdateCommand());
 program.addCommand(createhealthCommand());
 
 for (const command of pluginManager.getCommands()) {
-    program.addCommand(command);
+  program.addCommand(command);
 }
 
 try {
-    await program.parseAsync();
+  await program.parseAsync();
 } catch (error) {
-    handleError(error);
+  handleError(error);
 }
