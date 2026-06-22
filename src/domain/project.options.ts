@@ -9,11 +9,11 @@ export type EslintStrictness = 'recommended' | 'minimal' | 'strict';
 export type DependencyCruiserRules = 'no-circular' | 'strict' | 'full';
 
 export interface ProjectOptions {
-    dependencyCruiserRules?: DependencyCruiserRules;
-    eslintStrictness?: EslintStrictness;
-    stateManagement: StateManagement;
-    packageManager: PackageManager;
-    tools: DevelopmentTool[];
-    targetDirectory: string;
-    projectName: string;
+  dependencyCruiserRules?: DependencyCruiserRules;
+  eslintStrictness?: EslintStrictness;
+  stateManagement: StateManagement;
+  packageManager: PackageManager;
+  tools: DevelopmentTool[];
+  targetDirectory: string;
+  projectName: string;
 }

@@ -10,32 +10,32 @@ import { GitCheck } from '../../infrastructure/health/checks/git.check.js';
 import { handleError } from '../../shared/errors/error.handler.js';
 
 export const createhealthCommand = () => {
-    const command = new Command('health');
+  const command = new Command('health');
 
-    command
-        .description('Check environment and project health')
-        .option('-p, --project <path>', 'Project path to check')
-        .action(async (options) => {
-            try {
-                const terminal = new TerminalService();
+  command
+    .description('Check environment and project health')
+    .option('-p, --project <path>', 'Project path to check')
+    .action(async (options) => {
+      try {
+        const terminal = new TerminalService();
 
-                const checks = [
-                    new DependencyConsistencyCheck(),
-                    new PackageManagerCheck(),
-                    new ProjectStructureCheck(),
-                    new NodeVersionCheck(),
-                    new GitCheck(),
-                ];
-                const health = new healthService(checks, terminal);
+        const checks = [
+          new DependencyConsistencyCheck(),
+          new PackageManagerCheck(),
+          new ProjectStructureCheck(),
+          new NodeVersionCheck(),
+          new GitCheck(),
+        ];
+        const health = new healthService(checks, terminal);
 
-                await health.runAll({
-                    projectPath: options.project,
-                    nodeVersion: process.version,
-                });
-            } catch (error) {
-                handleError(error);
-            }
+        await health.runAll({
+          projectPath: options.project,
+          nodeVersion: process.version,
         });
+      } catch (error) {
+        handleError(error);
+      }
+    });
 
-    return command;
+  return command;
 };

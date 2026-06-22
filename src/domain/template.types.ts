@@ -1,9 +1,9 @@
 export type TemplateFramework = 'react';
 
 export interface TemplateDefinition {
-    framework: TemplateFramework;
+  framework: TemplateFramework;
 
-    name: string;
+  name: string;
 
-    path: string;
+  path: string;
 }

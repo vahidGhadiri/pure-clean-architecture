@@ -2,90 +2,90 @@ import type { CodeGeneratorResult, CodeGeneratorInput, CodeGenerator } from '../
 import { toPascalCase, toCamelCase } from '../../../../shared/naming.js';
 
 export class ModuleGenerator implements CodeGenerator {
-    readonly type = 'module';
+  readonly type = 'module';
 
-    async generate(input: CodeGeneratorInput): Promise<CodeGeneratorResult> {
-        const { targetDirectory, name } = input;
-        const pascal = toPascalCase(name);
-        const camel = toCamelCase(name);
+  async generate(input: CodeGeneratorInput): Promise<CodeGeneratorResult> {
+    const { targetDirectory, name } = input;
+    const pascal = toPascalCase(name);
+    const camel = toCamelCase(name);
 
-        return {
-            files: [
-                // Domain
-                {
-                    path: `${targetDirectory}/src/modules/${name}/domain/${name}.entity.ts`,
-                    content: this.generateEntity(pascal, camel),
-                },
-                {
-                    path: `${targetDirectory}/src/modules/${name}/domain/${name}.errors.ts`,
-                    content: this.generateErrors(pascal),
-                },
-                {
-                    path: `${targetDirectory}/src/modules/${name}/domain/${name}.repository.ts`,
-                    content: this.generateRepositoryPort(pascal),
-                },
-                {
-                    content: `export { ${pascal} } from "./${name}.entity";\nexport type { I${pascal}Repository } from "./${name}.repository";\n`,
-                    path: `${targetDirectory}/src/modules/${name}/domain/index.ts`,
-                },
-                // Application
-                {
-                    path: `${targetDirectory}/src/modules/${name}/application/dto/${name}.dto.ts`,
-                    content: this.generateDto(pascal),
-                },
-                {
-                    path: `${targetDirectory}/src/modules/${name}/application/dto/index.ts`,
-                    content: `export type { ${pascal}Dto } from "./${name}.dto";\n`,
-                },
-                {
-                    path: `${targetDirectory}/src/modules/${name}/application/use-cases/create-${name}.use-case.ts`,
-                    content: this.generateCreateUseCase(pascal, camel),
-                },
-                {
-                    path: `${targetDirectory}/src/modules/${name}/application/use-cases/get-${name}.use-case.ts`,
-                    content: this.generateGetUseCase(pascal, camel),
-                },
-                {
-                    content: `export { Create${pascal}UseCase } from "./create-${name}.use-case";\nexport { Get${pascal}UseCase, Get${pascal}sUseCase } from "./get-${name}.use-case";\n`,
-                    path: `${targetDirectory}/src/modules/${name}/application/use-cases/index.ts`,
-                },
-                {
-                    content: `export type { ${pascal}Dto } from "./dto";\nexport { Create${pascal}UseCase } from "./use-cases";\nexport { Get${pascal}UseCase, Get${pascal}sUseCase } from "./use-cases";\n`,
-                    path: `${targetDirectory}/src/modules/${name}/application/index.ts`,
-                },
-                // Infrastructure
-                {
-                    path: `${targetDirectory}/src/modules/${name}/infrastructure/${name}.endpoints.ts`,
-                    content: this.generateEndpoints(pascal, name),
-                },
-                {
-                    path: `${targetDirectory}/src/modules/${name}/infrastructure/${name}.mapper.ts`,
-                    content: this.generateMapper(pascal),
-                },
-                {
-                    path: `${targetDirectory}/src/modules/${name}/infrastructure/${name}.repository.ts`,
-                    content: this.generateRepositoryImpl(pascal, name),
-                },
-                {
-                    content: `export { ${pascal}Endpoints } from "./${name}.endpoints";\nexport { ${pascal}Repository } from "./${name}.repository";\n`,
-                    path: `${targetDirectory}/src/modules/${name}/infrastructure/index.ts`,
-                },
-                // Provider
-                {
-                    path: `${targetDirectory}/src/modules/${name}/${name}.provider.ts`,
-                    content: this.generateProvider(pascal),
-                },
-                // Public API
-                {
-                    path: `${targetDirectory}/src/modules/${name}/index.ts`,
-                    content: this.generatePublicApi(pascal, name),
-                },
-            ],
-        };
-    }
+    return {
+      files: [
+        // Domain
+        {
+          path: `${targetDirectory}/src/modules/${name}/domain/${name}.entity.ts`,
+          content: this.generateEntity(pascal, camel),
+        },
+        {
+          path: `${targetDirectory}/src/modules/${name}/domain/${name}.errors.ts`,
+          content: this.generateErrors(pascal),
+        },
+        {
+          path: `${targetDirectory}/src/modules/${name}/domain/${name}.repository.ts`,
+          content: this.generateRepositoryPort(pascal),
+        },
+        {
+          content: `export { ${pascal} } from "./${name}.entity";\nexport type { I${pascal}Repository } from "./${name}.repository";\n`,
+          path: `${targetDirectory}/src/modules/${name}/domain/index.ts`,
+        },
+        // Application
+        {
+          path: `${targetDirectory}/src/modules/${name}/application/dto/${name}.dto.ts`,
+          content: this.generateDto(pascal),
+        },
+        {
+          path: `${targetDirectory}/src/modules/${name}/application/dto/index.ts`,
+          content: `export type { ${pascal}Dto } from "./${name}.dto";\n`,
+        },
+        {
+          path: `${targetDirectory}/src/modules/${name}/application/use-cases/create-${name}.use-case.ts`,
+          content: this.generateCreateUseCase(pascal, camel),
+        },
+        {
+          path: `${targetDirectory}/src/modules/${name}/application/use-cases/get-${name}.use-case.ts`,
+          content: this.generateGetUseCase(pascal, camel),
+        },
+        {
+          content: `export { Create${pascal}UseCase } from "./create-${name}.use-case";\nexport { Get${pascal}UseCase, Get${pascal}sUseCase } from "./get-${name}.use-case";\n`,
+          path: `${targetDirectory}/src/modules/${name}/application/use-cases/index.ts`,
+        },
+        {
+          content: `export type { ${pascal}Dto } from "./dto";\nexport { Create${pascal}UseCase } from "./use-cases";\nexport { Get${pascal}UseCase, Get${pascal}sUseCase } from "./use-cases";\n`,
+          path: `${targetDirectory}/src/modules/${name}/application/index.ts`,
+        },
+        // Infrastructure
+        {
+          path: `${targetDirectory}/src/modules/${name}/infrastructure/${name}.endpoints.ts`,
+          content: this.generateEndpoints(pascal, name),
+        },
+        {
+          path: `${targetDirectory}/src/modules/${name}/infrastructure/${name}.mapper.ts`,
+          content: this.generateMapper(pascal),
+        },
+        {
+          path: `${targetDirectory}/src/modules/${name}/infrastructure/${name}.repository.ts`,
+          content: this.generateRepositoryImpl(pascal, name),
+        },
+        {
+          content: `export { ${pascal}Endpoints } from "./${name}.endpoints";\nexport { ${pascal}Repository } from "./${name}.repository";\n`,
+          path: `${targetDirectory}/src/modules/${name}/infrastructure/index.ts`,
+        },
+        // Provider
+        {
+          path: `${targetDirectory}/src/modules/${name}/${name}.provider.ts`,
+          content: this.generateProvider(pascal),
+        },
+        // Public API
+        {
+          path: `${targetDirectory}/src/modules/${name}/index.ts`,
+          content: this.generatePublicApi(pascal, name),
+        },
+      ],
+    };
+  }
 
-    private generateRepositoryImpl(pascal: string, name: string): string {
-        return `import type { IHttp } from "@shared/contracts";
+  private generateRepositoryImpl(pascal: string, name: string): string {
+    return `import type { IHttp } from "@shared/contracts";
 import type { I${pascal}Repository } from "@modules/${name}/domain";
 import type { ${pascal} } from "@modules/${name}/domain";
 import { ${pascal}Endpoints } from "./${name}.endpoints";
@@ -139,10 +139,10 @@ export class ${pascal}Repository implements I${pascal}Repository {
   }
 }
 `;
-    }
+  }
 
-    private generateProvider(pascal: string): string {
-        return `import type { IHttp } from "@shared/contracts";
+  private generateProvider(pascal: string): string {
+    return `import type { IHttp } from "@shared/contracts";
 import { createModuleProvider } from "@shared/kernel";
 import { ${pascal}Endpoints } from "./infrastructure";
 import { ${pascal}Repository } from "./infrastructure";
@@ -171,10 +171,10 @@ export const create${pascal}Provider = createModuleProvider<
   }),
 });
 `;
-    }
+  }
 
-    private generateEntity(pascal: string, camel: string): string {
-        return `import { ok, err, AppError } from "@shared/kernel";
+  private generateEntity(pascal: string, camel: string): string {
+    return `import { ok, err, AppError } from "@shared/kernel";
 import type { Result } from "@shared/kernel";
 
 export class ${pascal} {
@@ -211,10 +211,10 @@ interface ${pascal}Props {
   // TODO: Add fields
 }
 `;
-    }
+  }
 
-    private generatePublicApi(pascal: string, name: string): string {
-        return `import type { IHttp } from "@shared/contracts";
+  private generatePublicApi(pascal: string, name: string): string {
+    return `import type { IHttp } from "@shared/contracts";
 import type { ${pascal}Dto } from "./application";
 import { create${pascal}Provider, ${pascal}Endpoints } from "./${name}.provider";
 
@@ -233,10 +233,10 @@ export function create${pascal}Module(
   return create${pascal}Provider({ http });
 }
 `;
-    }
+  }
 
-    private generateGetUseCase(pascal: string, camel: string): string {
-        return `import { ok } from "@shared/kernel";
+  private generateGetUseCase(pascal: string, camel: string): string {
+    return `import { ok } from "@shared/kernel";
 import type { Result } from "@shared/kernel";
 import type { ${pascal} } from "@modules/${camel}/domain";
 import type { I${pascal}Repository } from "@modules/${camel}/domain";
@@ -257,10 +257,10 @@ export class Get${pascal}sUseCase {
   }
 }
 `;
-    }
+  }
 
-    private generateCreateUseCase(pascal: string, camel: string): string {
-        return `import { ok } from "@shared/kernel";
+  private generateCreateUseCase(pascal: string, camel: string): string {
+    return `import { ok } from "@shared/kernel";
 import type { Result } from "@shared/kernel";
 import { ${pascal} } from "@modules/${camel}/domain";
 import type { I${pascal}Repository } from "@modules/${camel}/domain";
@@ -274,10 +274,10 @@ export class Create${pascal}UseCase {
   }
 }
 `;
-    }
+  }
 
-    private generateRepositoryPort(pascal: string): string {
-        return `export interface I${pascal}Repository {
+  private generateRepositoryPort(pascal: string): string {
+    return `export interface I${pascal}Repository {
   findById(id: string): Promise<${pascal}>;
   findAll(): Promise<${pascal}[]>;
   create(data: ${pascal}CreateData): Promise<${pascal}>;
@@ -293,10 +293,10 @@ interface ${pascal}UpdateData {
   // TODO: Add fields
 }
 `;
-    }
+  }
 
-    private generateEndpoints(pascal: string, name: string): string {
-        return `export const ${pascal}Endpoints = {
+  private generateEndpoints(pascal: string, name: string): string {
+    return `export const ${pascal}Endpoints = {
   GET_${name.toUpperCase()}: "/api/${name}/:id",
   GET_${name.toUpperCase()}S: "/api/${name}",
   CREATE_${name.toUpperCase()}: "/api/${name}",
@@ -306,10 +306,10 @@ interface ${pascal}UpdateData {
 
 export type ${pascal}Endpoints = typeof ${pascal}Endpoints;
 `;
-    }
+  }
 
-    private generateErrors(pascal: string): string {
-        return `import { AppError } from "@shared/kernel";
+  private generateErrors(pascal: string): string {
+    return `import { AppError } from "@shared/kernel";
 
 export class ${pascal}NotFoundError extends AppError {
   constructor(id?: string | number) {
@@ -319,23 +319,23 @@ export class ${pascal}NotFoundError extends AppError {
   }
 }
 `;
-    }
+  }
 
-    private generateMapper(pascal: string): string {
-        return `// TODO: Implement domain ↔ API mapping functions
+  private generateMapper(pascal: string): string {
+    return `// TODO: Implement domain ↔ API mapping functions
 export function toDomain(raw: unknown): ${pascal} {
   throw new Error("Not implemented");
 }
 `;
-    }
+  }
 
-    private generateDto(pascal: string): string {
-        return `export interface ${pascal}Dto {
+  private generateDto(pascal: string): string {
+    return `export interface ${pascal}Dto {
   id: string;
   createdAt: string;
   updatedAt: string;
   // TODO: Add fields
 }
 `;
-    }
+  }
 }

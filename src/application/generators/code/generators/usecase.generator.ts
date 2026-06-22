@@ -2,16 +2,16 @@ import type { CodeGeneratorResult, CodeGeneratorInput, CodeGenerator } from '../
 import { toPascalCase } from '../../../../shared/naming.js';
 
 export class UseCaseGenerator implements CodeGenerator {
-    readonly type = 'usecase';
+  readonly type = 'usecase';
 
-    async generate(input: CodeGeneratorInput): Promise<CodeGeneratorResult> {
-        const { targetDirectory, name } = input;
-        const pascal = toPascalCase(name);
+  async generate(input: CodeGeneratorInput): Promise<CodeGeneratorResult> {
+    const { targetDirectory, name } = input;
+    const pascal = toPascalCase(name);
 
-        return {
-            files: [
-                {
-                    content: `export class ${pascal}UseCase {
+    return {
+      files: [
+        {
+          content: `export class ${pascal}UseCase {
   constructor() {}
 
   async execute() {
@@ -19,9 +19,9 @@ export class UseCaseGenerator implements CodeGenerator {
   }
 }
 `,
-                    path: `${targetDirectory}/src/application/use-cases/${name}.usecase.ts`,
-                },
-            ],
-        };
-    }
+          path: `${targetDirectory}/src/application/use-cases/${name}.usecase.ts`,
+        },
+      ],
+    };
+  }
 }
