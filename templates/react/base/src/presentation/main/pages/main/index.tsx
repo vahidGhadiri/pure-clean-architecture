@@ -1,5 +1,5 @@
 const Main = () => {
-    return <>Main</>;
+  return <>Main</>;
 };
 
 export default Main;
