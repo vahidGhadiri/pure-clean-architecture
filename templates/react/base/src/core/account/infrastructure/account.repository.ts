@@ -73,11 +73,4 @@ export class AccountRepository implements IAccountRepository {
             method: 'DELETE',
         });
     }
-
-    public sample: IAccountRepository['update'] = async () => {
-        return await this.http.request({
-            endpoint: 'DELETE_ACCOUNT',
-            method: 'GET',
-        });
-    };
 }
