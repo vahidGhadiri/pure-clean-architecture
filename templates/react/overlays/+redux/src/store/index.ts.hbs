@@ -1,7 +1,19 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { accountApi } from "@adapters/account.adapter";
+import { productApi } from "@adapters/product.adapter";
+import { orderApi } from "@adapters/order.adapter";
 
 export const store = configureStore({
-  reducer: {},
+  reducer: {
+    [accountApi.reducerPath]: accountApi.reducer,
+    [productApi.reducerPath]: productApi.reducer,
+    [orderApi.reducerPath]: orderApi.reducer,
+  },
+  middleware: (getDefault) =>
+    getDefault()
+      .concat(accountApi.middleware)
+      .concat(productApi.middleware)
+      .concat(orderApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
