@@ -12,7 +12,7 @@ import type {
     AccountDto,
 } from './application';
 import type { AccountDeps } from './account.context';
-import { AccountEndpoints } from './account.context';
+import { AccountEndpoints, createAccountContext as createBaseAccountContext } from './account.context';
 
 export type { CreateAccountDto, UpdateAccountDto, AccountDto };
 export { AccountEndpoints };
@@ -30,5 +30,5 @@ export function createAccountContext(overrides?: Partial<AccountDeps>): AccountC
         http: overrides?.http ?? createHttp(AccountEndpoints),
         storage: overrides?.storage ?? new Storage(),
     };
-    return createAccountContext(container);
+    return createBaseAccountContext(container);
 }

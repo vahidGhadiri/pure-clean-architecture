@@ -11,7 +11,7 @@ import type {
     ProductDto,
 } from './application';
 import type { ProductDeps } from './product.context';
-import { ProductEndpoints } from './product.context';
+import { ProductEndpoints, createProductContext as createBaseProductContext } from './product.context';
 
 export { ProductEndpoints };
 export type { ProductCategory };
@@ -28,5 +28,5 @@ export function createProductContext(overrides?: Partial<ProductDeps>): ProductC
     const container: ProductDeps = {
         http: overrides?.http ?? createHttp(ProductEndpoints),
     };
-    return createProductContext(container);
+    return createBaseProductContext(container);
 }
