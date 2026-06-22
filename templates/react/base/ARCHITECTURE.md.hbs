@@ -92,33 +92,108 @@ mapResult(result, fn)       // transform success value
 combine(resultA, resultB)   // merge multiple Results
 ```
 
-## React Query as adapters
+## Adapters
 
-React Query hooks in `features/*/hooks/` serve as the adapter between the UI and
+{{#if tanstackQuery}}
+### React Query
+
+React Query hooks in `adapters/` serve as the adapter between the UI and
 module use-cases. They handle data fetching, caching, loading/error states, and
 mutation orchestration — while use-cases handle pure business logic.
 
 ```typescript
-// features/dashboard/hooks/use-dashboard-accounts.ts
+// adapters/account/queries/use-get-accounts.ts
 import { useQuery } from "@tanstack/react-query";
-import { getAccounts } from "@modules/account";
+import { useAccountContext } from "../..";
 
 export function useAccounts() {
-  const { data, isLoading, error } = useQuery({
+  const { getAccounts } = useAccountContext();
+
+  const { isLoading, refetch, error, data } = useQuery({
+    queryFn: () => getAccounts.execute(),
     queryKey: ["accounts"],
-    queryFn: async () => {
-      const result = await getAccounts.execute();
-      if (!result.success) throw result.error;  // React Query catches this
-      return result.data.map(toDto);             // map domain → DTO
-    },
   });
 
-  return { accounts: data ?? [], isLoading, error };
+  return { accounts: data ?? [], isLoading, refetch, error };
 }
 ```
 
 The hook calls the module's public API, unwraps the Result, and lets React Query
 manage the async state. Components never see Result — they see `{ data, isLoading, error }`.
+{{/if}}
+
+{{#if redux}}
+### Redux Toolkit (RTK Query)
+
+RTK Query endpoints delegate to use-cases via a custom `fakeBaseQuery`.
+Each domain defines ONE API with `createApi`, keeping a single `reducerPath`.
+
+```typescript
+// adapters/account/account.api.ts
+import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createAccountContext } from "@core/account";
+
+function getServices() {
+  return createAccountContext();
+}
+
+export const accountApi = createApi({
+  reducerPath: "accountApi",
+  baseQuery: fakeBaseQuery(),
+  tagTypes: ["Account"],
+  endpoints: (builder) => ({
+    getAccounts: builder.query({
+      queryFn: async () => {
+        const { getAccounts } = getServices();
+        const data = await getAccounts.execute();
+        return { data };
+      },
+      providesTags: ["Account"],
+    }),
+  }),
+});
+
+export const { useGetAccountsQuery } = accountApi;
+```
+
+The store registers all API reducers and middleware in `store/index.ts`.
+{{/if}}
+
+{{#unless tanstackQuery}}{{#unless redux}}
+### Plain React (useState + useEffect)
+
+Without a state management library, adapters use local React state.
+They call use-cases directly and manage loading/error states manually.
+
+```typescript
+// adapters/account/queries/use-get-accounts.ts
+import { useAccountContext } from "../..";
+import { useEffect, useState } from "react";
+
+export function useAccounts() {
+  const { getAccounts } = useAccountContext();
+  const [accounts, setAccounts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const refetch = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getAccounts.execute();
+      setAccounts(data);
+    } catch (e) {
+      setError(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => { refetch(); }, [getAccounts]);
+
+  return { accounts, isLoading, refetch, error };
+}
+```
+{{/unless}}{{/unless}}
 
 ## Module provider: before vs. after
 
