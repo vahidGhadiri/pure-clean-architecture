@@ -1,0 +1,16 @@
+{
+    "eslint.run": "onType",
+    "eslint.useFlatConfig": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    "editor.formatOnSave": false,
+    "prettier.enable": true,
+    "eslint.workingDirectories": [
+        {
+            "directory": ".",
+            "changeProcessCWD": true
+        }
+    ],
+    "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
+}
