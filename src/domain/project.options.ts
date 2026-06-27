@@ -1,0 +1,19 @@
+export type PackageManager = 'pnpm' | 'yarn' | 'npm';
+
+export type StateManagement = 'tanstack-zustand' | 'tanstack-query' | 'redux-toolkit' | 'none';
+
+export type DevelopmentTool = 'dependency-cruiser' | 'eslint';
+
+export type EslintStrictness = 'recommended' | 'minimal' | 'strict';
+
+export type DependencyCruiserRules = 'no-circular' | 'strict' | 'full';
+
+export interface ProjectOptions {
+    dependencyCruiserRules?: DependencyCruiserRules;
+    eslintStrictness?: EslintStrictness;
+    stateManagement: StateManagement;
+    packageManager: PackageManager;
+    tools: DevelopmentTool[];
+    targetDirectory: string;
+    projectName: string;
+}
