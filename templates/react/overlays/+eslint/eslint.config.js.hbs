@@ -1,0 +1,18 @@
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+{{#if (eq eslintStrictness "strict")}}
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
+{{/if}}
+
+export default tseslint.config(
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+{{#if (eq eslintStrictness "strict")}}
+  react.configs.flat.recommended,
+  reactHooks.configs["flat/recommended"],
+{{/if}}
+  {
+    ignores: ["dist/"],
+  },
+);
