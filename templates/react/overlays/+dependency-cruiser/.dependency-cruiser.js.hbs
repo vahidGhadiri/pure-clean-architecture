@@ -1,0 +1,53 @@
+/** @type {import('dependency-cruiser').Configuration} */
+module.exports = {
+  forbidden: [
+{{#if (eq dependencyCruiserRules "no-circular")}}
+    {
+      name: "no-circular",
+      severity: "error",
+      from: {},
+      to: { circular: true },
+    },
+{{/if}}
+{{#if (eq dependencyCruiserRules "strict")}}
+    {
+      name: "no-circular",
+      severity: "error",
+      from: {},
+      to: { circular: true },
+    },
+    {
+      name: "no-layer-crossing",
+      severity: "error",
+      from: { path: "src/domain" },
+      to: { path: "src/infrastructure" },
+    },
+{{/if}}
+{{#if (eq dependencyCruiserRules "full")}}
+    {
+      name: "no-circular",
+      severity: "error",
+      from: {},
+      to: { circular: true },
+    },
+    {
+      name: "no-layer-crossing",
+      severity: "error",
+      from: { path: "src/domain" },
+      to: { path: "^(src/infrastructure|src/application)" },
+    },
+    {
+      name: "no-domain-to-infrastructure",
+      severity: "error",
+      from: { path: "src/domain" },
+      to: { path: "src/infrastructure" },
+    },
+    {
+      name: "no-infrastructure-to-domain",
+      severity: "error",
+      from: { path: "src/infrastructure" },
+      to: { path: "src/domain" },
+    },
+{{/if}}
+  ],
+};
