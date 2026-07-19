@@ -83,3 +83,7 @@ ISC
 - pnpm
 
 > Maintained with @whydrf/eslint-plugin-nava
+
+## Status
+
+- Scaffolding CLI is functional
