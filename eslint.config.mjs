@@ -144,3 +144,5 @@ export default [
 ];
 
 // Enforced via @whydrf/eslint-plugin-nava
+
+// Enforced via @whydrf/eslint-plugin-nava
