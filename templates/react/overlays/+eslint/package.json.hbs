@@ -3,9 +3,18 @@
     "eslint": "^9.0.0",
     "@eslint/js": "^9.0.0",
     "typescript-eslint": "^8.0.0",
-    "eslint-plugin-boundaries": "^5.0.0"{{#if (eq eslintStrictness "strict")}},
+    "eslint-plugin-prettier": "^5.0.0"{{#if (eq eslintStrictness "recommended")}},
     "eslint-plugin-react": "^7.0.0",
-    "eslint-plugin-react-hooks": "^5.0.0"{{/if}}
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-perfectionist": "^3.0.0",
+    "eslint-plugin-boundaries": "^5.0.0",
+    "@whydrf/eslint-plugin-nava": "^0.1.0"{{/if}}{{#if (eq eslintStrictness "strict")}},
+    "eslint-plugin-react": "^7.0.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-perfectionist": "^3.0.0",
+    "eslint-plugin-boundaries": "^5.0.0",
+    "@whydrf/eslint-plugin-nava": "^0.1.0",
+    "typescript-eslint-parser-for-extra-files": "^0.1.0"{{/if}}
   },
   "scripts": {
     "lint": "eslint ."
