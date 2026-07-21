@@ -4,8 +4,8 @@ import type { DependencySet } from '../domain/dependency.types.js';
 import type { ProjectOptions } from '../domain/project.options.js';
 
 export interface GeneratorContext {
-    extraTransformers?: ITemplateTransformer[];
-    template: TemplateDefinition;
-    dependencies: DependencySet;
-    options: ProjectOptions;
+  extraTransformers?: ITemplateTransformer[];
+  template: TemplateDefinition;
+  dependencies: DependencySet;
+  options: ProjectOptions;
 }
