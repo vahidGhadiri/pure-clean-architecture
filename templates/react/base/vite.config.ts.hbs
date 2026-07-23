@@ -6,6 +6,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      "@presentation": path.resolve(__dirname, "src/presentation"),
+      "@shared_kernel": path.resolve(__dirname, "src/shared_kernel"),
       "@shared": path.resolve(__dirname, "src/shared"),
       "@core": path.resolve(__dirname, "src/core"),
       "@features": path.resolve(__dirname, "src/features"),

@@ -1,0 +1,392 @@
+import { useState } from 'react';
+
+import './architecture.css';
+
+type LayerId = 'presentation' | 'adapters' | 'application' | 'domain' | 'infrastructure';
+
+interface LayerInfo {
+  readonly id: LayerId;
+  readonly name: string;
+  readonly hex: string;
+  readonly subtitle: string;
+  readonly description: string;
+  readonly files: readonly string[];
+  readonly exampleTitle: string;
+  readonly example: string;
+  readonly path: string;
+}
+
+const presentationLayer: LayerInfo = {
+  id: 'presentation',
+  name: 'Presentation',
+  hex: '#ec4899',
+  subtitle: 'React Components & Routes',
+  description:
+    'The outermost layer. Contains React components, page layouts, and routing configuration. Components never contain business logic — they delegate all data operations to adapter hooks.',
+  files: [
+    'Components — Reusable UI elements (buttons, cards, forms)',
+    'Pages — Route-level layouts (Main, Contact, Architecture)',
+    'Routes — React Router configuration with lazy loading',
+    'Styles — CSS modules or Tailwind classes',
+  ],
+  exampleTitle: 'Page Component',
+  example: `import { useAccounts } from '@adapters/account';
+
+function AccountList() {
+  const { accounts, isLoading } = useAccounts();
+
+  if (isLoading) return <Spinner />;
+
+  return (
+    <ul>
+      {accounts.map((a) => (
+        <li key={a.id}>{a.holderName}</li>
+      ))}
+    </ul>
+  );
+}`,
+  path: 'src/presentation',
+};
+
+{{#if tanstackQuery}}
+const adaptersLayer: LayerInfo = {
+  id: 'adapters',
+  name: 'Adapters',
+  hex: '#f59e0b',
+  subtitle: 'TanStack Query Hooks',
+  description:
+    'Bridge between Presentation and the Bounded Context. Adapter hooks call the module\'s public API (use cases) and wrap results in useQuery/useMutation for automatic caching, background refetch, and cache invalidation.',
+  files: [
+    'Commands — useCreateAccount, useUpdateAccount (mutations)',
+    'Queries — useAccounts, useAccount (queries)',
+    'Query Keys — Cache invalidation strategies per entity',
+    'Context — useAccountContext for dependency injection',
+  ],
+  exampleTitle: 'Query Adapter — useAccounts',
+  example: `import { useQuery } from '@tanstack/react-query';
+import { useAccountContext } from '../..';
+
+const ACCOUNT_KEY = ['accounts'];
+
+export function useAccounts() {
+  const { getAccounts } = useAccountContext();
+
+  const { isLoading, data, error } = useQuery({
+    queryFn: () => getAccounts.execute(),
+    queryKey: ACCOUNT_KEY,
+  });
+
+  return { accounts: data ?? [], isLoading, error };
+}`,
+  path: 'src/adapters',
+};
+{{else if redux}}
+const adaptersLayer: LayerInfo = {
+  id: 'adapters',
+  name: 'Adapters',
+  hex: '#f59e0b',
+  subtitle: 'Redux Toolkit (RTK Query)',
+  description:
+    'Bridge between Presentation and the Bounded Context. Each entity defines a createApi slice with fakeBaseQuery. Endpoints delegate to use cases via the module\'s public API. Tag-based cache invalidation keeps the store synchronized.',
+  files: [
+    'API Slices — createApi per entity with endpoints',
+    'Mutations — createAccount, updateAccount with tags',
+    'Queries — getAccounts with providesTags',
+    'Store — Redux store combining all API reducers',
+  ],
+  exampleTitle: 'RTK Query Adapter — accountApi',
+  example: `import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createAccountContext } from '@core/account';
+
+function getServices() {
+  return createAccountContext();
+}
+
+export const accountApi = createApi({
+  reducerPath: 'accountApi',
+  baseQuery: fakeBaseQuery(),
+  tagTypes: ['Account'],
+  endpoints: (builder) => ({
+    getAccounts: builder.query<AccountDto[], void>({
+      queryFn: async () => {
+        const { getAccounts } = getServices();
+        return { data: await getAccounts.execute() };
+      },
+      providesTags: ['Account'],
+    }),
+  }),
+});`,
+  path: 'src/adapters',
+};
+{{else if zustand}}
+const adaptersLayer: LayerInfo = {
+  id: 'adapters',
+  name: 'Adapters',
+  hex: '#f59e0b',
+  subtitle: 'Zustand Store + Hooks',
+  description:
+    'Bridge between Presentation and the Bounded Context. Adapter hooks call use cases and manage UI state. Zustand handles global client state (theme, sidebar) with a factory pattern for test isolation. Server state flows through adapter hooks.',
+  files: [
+    'Store — Zustand factory with typed selectors',
+    'Hooks — useCreateAccount, useAccounts (wrapping use cases)',
+    'UI State — Theme, sidebar, user preferences',
+    'Selectors — Memoized derived state',
+  ],
+  exampleTitle: 'Zustand Store — createAppStore',
+  example: `import { create } from 'zustand';
+
+type Theme = 'light' | 'dark' | 'system';
+
+interface UIState {
+  readonly sidebarOpen: boolean;
+  readonly theme: Theme;
+  readonly setSidebarOpen: (open: boolean) => void;
+  readonly toggleSidebar: () => void;
+  readonly setTheme: (theme: Theme) => void;
+}
+
+export function createAppStore() {
+  return create<UIState>((set) => ({
+    sidebarOpen: false,
+    theme: 'system',
+    setSidebarOpen: (open) => set({ sidebarOpen: open }),
+    toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+    setTheme: (theme) => set({ theme }),
+  }));
+}
+
+export const useAppStore = createAppStore();`,
+  path: 'src/adapters + src/store',
+};
+{{else}}
+const adaptersLayer: LayerInfo = {
+  id: 'adapters',
+  name: 'Adapters',
+  hex: '#f59e0b',
+  subtitle: 'Custom React Hooks',
+  description:
+    'Bridge between Presentation and the Bounded Context. Custom useQuery/useMutation hooks call use cases directly and manage loading/error/state with pure React hooks. No external state library — zero bundle overhead.',
+  files: [
+    'Commands — useCreateAccount (wrapping mutations)',
+    'Queries — useAccounts (wrapping queries)',
+    'Shared — Reusable useQuery/useMutation primitives',
+    'Cache — In-memory cache with configurable TTL',
+  ],
+  exampleTitle: 'Custom Hook — useCreateAccount',
+  example: `import type { CreateAccountDto, AccountDto } from '@core/account';
+import { createAccountContext } from '@core/account';
+import { useMutation } from '../../shared';
+
+export function useCreateAccount() {
+  const { createAccount } = createAccountContext();
+  return useMutation<CreateAccountDto, AccountDto>(
+    (dto) => createAccount.execute(dto)
+  );
+}
+
+// Shared useMutation handles:
+// loading, error, reset, onSuccess, onError`,
+  path: 'src/adapters',
+};
+{{/if}}
+
+const applicationLayer: LayerInfo = {
+  id: 'application',
+  name: 'Application',
+  hex: '#10b981',
+  subtitle: 'Use Cases — Orchestrating Logic',
+  description:
+    'Inside the Bounded Context. Each use case represents a single business operation. It receives a repository port from the domain and orchestrates the business logic. Use cases depend ONLY on domain interfaces — no HTTP, no databases, no React.',
+  files: [
+    'Use Cases — One class per operation (Create, Get, Update)',
+    'DTOs — Input/output typed shapes',
+    'Ports — Receives repository interface via constructor',
+  ],
+  exampleTitle: 'CreateAccountUseCase',
+  example: `import type { CreateAccountDto, AccountDto } from '../../domain';
+import type { IAccountRepository } from '../../domain';
+
+export class CreateAccountUseCase {
+  constructor(
+    private readonly repository: IAccountRepository
+  ) {}
+
+  async execute(dto: CreateAccountDto): Promise<AccountDto> {
+    return this.repository.create({
+      id: crypto.randomUUID(),
+      holderName: dto.holderName,
+      balance: dto.initialBalance,
+      type: dto.type,
+    });
+  }
+}`,
+  path: 'src/core/*/application',
+};
+
+const domainLayer: LayerInfo = {
+  id: 'domain',
+  name: 'Domain',
+  hex: '#6366f1',
+  subtitle: 'DTOs & Repository Ports',
+  description:
+    'Inside the Bounded Context. Contains DTOs (data transfer objects) and repository port interfaces. This layer has ZERO external dependencies — no React, no HTTP, no databases. It defines WHAT the business needs, not HOW it\'s implemented.',
+  files: [
+    'DTOs — AccountDto, CreateAccountDto, UpdateAccountDto',
+    'Repository Ports — IAccountRepository interface',
+    'Types — AccountType enum, domain-specific values',
+    'Zero external imports — pure TypeScript only',
+  ],
+  exampleTitle: 'Repository Port — IAccountRepository',
+  example: `export type AccountType = 'CHECKING' | 'SAVINGS';
+
+export interface AccountDto {
+  readonly holderName: string;
+  readonly type: AccountType;
+  readonly balance: number;
+  readonly id: string;
+}
+
+export interface IAccountRepository {
+  create(data: CreateAccountData): Promise<AccountDto>;
+  update(id: string, data: UpdateData): Promise<AccountDto>;
+  findById(id: string): Promise<AccountDto>;
+  findAll(): Promise<AccountDto[]>;
+  delete(id: string): Promise<void>;
+}`,
+  path: 'src/core/*/domain',
+};
+
+const infrastructureLayer: LayerInfo = {
+  id: 'infrastructure',
+  name: 'Infrastructure',
+  hex: '#a855f7',
+  subtitle: 'Repository Implementations & HTTP',
+  description:
+    'The innermost layer. Implements domain repository ports with concrete HTTP calls, storage, and external service integrations. This is where requests actually happen. Swapping an API provider changes ONLY this layer.',
+  files: [
+    'Repositories — Implements IAccountRepository',
+    'Endpoints — API path constants per entity',
+    'HTTP Client — Typed request/response via shared kernel',
+    'Storage — Cache persistence via shared kernel',
+  ],
+  exampleTitle: 'AccountRepository — HTTP Implementation',
+  example: `export class AccountRepository implements IAccountRepository {
+  constructor(
+    private readonly http: IHttp<typeof AccountEndpoints>,
+    private readonly storage: IStorage
+  ) {}
+
+  async findAll(): Promise<AccountDto[]> {
+    const cached = this.storage.getStorageData<AccountDto[]>({
+      isPersisted: true, key: 'accounts',
+    });
+    if (cached) return cached;
+
+    const accounts = await this.http.request<
+      'GET_ACCOUNTS', AccountDto[]
+    >({ endpoint: 'GET_ACCOUNTS', method: 'GET' });
+
+    this.storage.setStorageData({
+      isPersisted: true, key: 'accounts', value: accounts,
+    });
+    return accounts;
+  }
+}`,
+  path: 'src/core/*/infrastructure',
+};
+
+const layers: readonly LayerInfo[] = [
+  infrastructureLayer,
+  domainLayer,
+  applicationLayer,
+  adaptersLayer,
+  presentationLayer,
+];
+
+const Architecture = () => {
+  const [selected, setSelected] = useState<LayerId>('domain');
+  const active = layers.find((l) => l.id === selected)!;
+
+  return (
+    <div className="arch">
+      <div className="arch-glow" />
+
+      <section className="arch-hero">
+        <div className="arch-hero-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+          Clean Architecture
+        </div>
+        <h1 className="arch-title">Architecture Deep Dive</h1>
+        <p className="arch-desc">Click on any layer to explore its responsibilities, contents, and code examples.</p>
+      </section>
+
+      <section className="arch-explorer">
+        <div className="explorer-diagram">
+          <div className="rings-stack" style=\{{ '--active-hex': active.hex } as React.CSSProperties}>
+            {[...layers].reverse().map((layer) => {
+              const isActive = selected === layer.id;
+              const isDimmed = selected !== layer.id;
+              return (
+                <button
+                  key={layer.id}
+                  type="button"
+                  className={[
+                    'ring',
+                    `ring-${layer.id}`,
+                    isActive && 'ring-active',
+                    isDimmed && 'ring-dimmed',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  style=\{{ '--ring-hex': layer.hex } as React.CSSProperties}
+                  onClick={() => setSelected(layer.id)}
+                >
+                  <span className="ring-label">{layer.name}</span>
+                </button>
+              );
+            })}
+            <div className="boundary-line">
+              <span className="boundary-text">BOUNDARY</span>
+            </div>
+            <div className="ring-center-dot" />
+          </div>
+          <p className="diagram-caption">Presentation → Adapters → <strong>Bounded Context</strong> → Application → Domain → Infrastructure</p>
+        </div>
+
+        <div className="explorer-detail" key={active.id}>
+          <div className="detail-header">
+            <div className="detail-badge" style=\{{ color: active.hex, background: `${active.hex}1a` }}>
+              {active.name}
+            </div>
+            <code className="detail-path">{active.path}</code>
+          </div>
+
+          <h2 className="detail-subtitle">{active.subtitle}</h2>
+          <p className="detail-desc">{active.description}</p>
+
+          <div className="detail-files">
+            <h4>What goes here</h4>
+            <ul>
+              {active.files.map((file) => (
+                <li key={file}>{file}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="detail-example">
+            <div className="example-header">{active.exampleTitle}</div>
+            <pre>
+              <code>{active.example}</code>
+            </pre>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Architecture;

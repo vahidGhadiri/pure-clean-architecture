@@ -19,6 +19,7 @@
     "baseUrl": ".",
     "paths": {
       "@shared_kernel/*": ["./src/shared_kernel/*"],
+      "@presentation/*": ["./src/presentation/*"],
       "@core/*": ["src/core/*"],
       "@adapters/*": ["./src/adapters/*"],
       "@features/*": ["./src/features/*"]

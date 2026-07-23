@@ -1,0 +1,134 @@
+import './home.css';
+
+const Home = () => {
+  return (
+    <div className="home">
+      <div className="home-glow" />
+      <div className="home-glow-2" />
+
+      <section className="hero">
+        <div className="hero-badge">
+          <span className="hero-dot" />
+          Production-Ready scaffold
+        </div>
+
+        <h1 className="hero-title">
+          Welcome to
+          <br />
+          <span className="hero-gradient">{{projectName}}</span>
+        </h1>
+
+        <p className="hero-desc">
+          A React application built with strict Clean Architecture principles.
+          Typed contracts, scalable layers, and zero妥协 on separation of concerns.
+        </p>
+
+        <div className="hero-chips">
+          <span className="chip">React 19</span>
+          <span className="chip">TypeScript</span>
+          <span className="chip">Vite</span>
+          {{#if stateManagement}}
+          <span className="chip chip-accent">{{stateManagement}}</span>
+          {{/if}}
+          <span className="chip">Clean Architecture</span>
+        </div>
+
+        <div className="hero-meta">
+          <span className="meta">{{author}}</span>
+          <span className="meta-dot" />
+          <span className="meta">{{packageManager}}</span>
+          {{#if eslintStrictness}}
+          <span className="meta-dot" />
+          <span className="meta">ESLint {{eslintStrictness}}</span>
+          {{/if}}
+        </div>
+      </section>
+
+      <section className="overview">
+        <h2 className="section-title">Architecture Overview</h2>
+        <p className="section-desc">
+          Four layers, each with a single responsibility. Dependencies point inward only.
+        </p>
+
+        <div className="overview-grid">
+          <a href="/architecture" className="overview-card card-domain">
+            <div className="card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83" />
+              </svg>
+            </div>
+            <h3>Domain</h3>
+            <p>Entities, use-case interfaces, and pure business rules. Zero external dependencies.</p>
+            <code>src/core/*/domain</code>
+          </a>
+
+          <a href="/architecture" className="overview-card card-application">
+            <div className="card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <h3>Application</h3>
+            <p>Use cases that orchestrate domain logic. Depends only on domain interfaces.</p>
+            <code>src/core/*/application</code>
+          </a>
+
+          <a href="/architecture" className="overview-card card-infrastructure">
+            <div className="card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8m-4-4v4" />
+              </svg>
+            </div>
+            <h3>Infrastructure</h3>
+            <p>HTTP clients, storage, and external service implementations.</p>
+            <code>src/core/*/infrastructure</code>
+          </a>
+
+          <a href="/architecture" className="overview-card card-presentation">
+            <div className="card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </div>
+            <h3>Presentation</h3>
+            <p>React components, routes, and UI adapters. Consumes use cases via hooks.</p>
+            <code>src/presentation</code>
+          </a>
+        </div>
+      </section>
+
+      <section className="principles">
+        <h2 className="section-title">Core Principles</h2>
+        <div className="principles-grid">
+          <div className="principle">
+            <div className="principle-num">01</div>
+            <h4>Dependency Rule</h4>
+            <p>Source code dependencies can only point inward. Domain knows nothing about the outside world.</p>
+          </div>
+          <div className="principle">
+            <div className="principle-num">02</div>
+            <h4>Interface Segregation</h4>
+            <p>Use-case interfaces live in the domain. Implementations are injected from infrastructure.</p>
+          </div>
+          <div className="principle">
+            <div className="principle-num">03</div>
+            <h4>Separation of Concerns</h4>
+            <p>Each layer has one job. UI does not contain business logic. Business rules do not know about HTTP.</p>
+          </div>
+          <div className="principle">
+            <div className="principle-num">04</div>
+            <h4>Testability by Design</h4>
+            <p>Isolated layers make unit testing trivial. Swap infrastructure with fakes without touching business logic.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Home;

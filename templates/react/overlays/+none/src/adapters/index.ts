@@ -1,3 +1,3 @@
-export { useCreateAccount, useUpdateAccount, useAccounts } from './account/account.adapter';
-export { useCreateProduct, useUpdateProduct, useProducts } from './product/product.adapter';
-export { useCreateOrder, useOrders } from './order/order.adapter';
+export * as account from './account';
+export * as product from './product';
+export * as order from './order';
