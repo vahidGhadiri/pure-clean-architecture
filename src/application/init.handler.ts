@@ -6,9 +6,9 @@ import type {
   IInstallerFactory,
   ITerminalService,
 } from '../domain/interfaces.js';
+import { installDependenciesPrompt, createProjectOptions, runDevPrompt } from './prompts/index.js';
 import { InstallerService } from '../infrastructure/package-manager/installer.service.js';
 import { DependencyTransformer } from '../shared/transformers/dependency.transformer.js';
-import { installDependenciesPrompt, createProjectOptions } from './prompts/index.js';
 import { GitServiceWrapper } from '../infrastructure/git/git.service.wrapper.js';
 import { GitService } from '../infrastructure/git/git.service.js';
 
@@ -65,5 +65,26 @@ export class InitHandler {
 
     this.deps.terminal.blank();
     this.deps.terminal.success(`Project "${options.projectName}" created successfully, Enjoy Clean Architecture!`);
+
+    const shouldRun = await runDevPrompt();
+    if (shouldRun) {
+      this.deps.terminal.blank();
+      this.deps.terminal.info('Starting dev server on http://localhost:3000 ...');
+      await this.spawnDevServer(projectPath, options.packageManager);
+    }
+  }
+
+  private async spawnDevServer(cwd: string, packageManager: string): Promise<void> {
+    const { spawn } = await import('node:child_process');
+
+    const cmd = packageManager === 'npm' ? 'npm' : packageManager;
+    const args = packageManager === 'npm' ? ['run', 'dev', '--', '--port', '3000'] : ['dev', '--port', '3000'];
+
+    const child = spawn(cmd, args, { stdio: 'inherit', shell: true, cwd });
+
+    await new Promise<void>((resolve) => {
+      child.on('close', () => resolve());
+      child.on('error', () => resolve());
+    });
   }
 }
