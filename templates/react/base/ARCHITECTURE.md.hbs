@@ -94,7 +94,6 @@ combine(resultA, resultB)   // merge multiple Results
 
 ## Adapters
 
-{{#if tanstackQuery}}
 ### React Query
 
 React Query hooks in `adapters/` serve as the adapter between the UI and
@@ -120,80 +119,6 @@ export function useAccounts() {
 
 The hook calls the module's public API, unwraps the Result, and lets React Query
 manage the async state. Components never see Result — they see `{ data, isLoading, error }`.
-{{/if}}
-
-{{#if redux}}
-### Redux Toolkit (RTK Query)
-
-RTK Query endpoints delegate to use-cases via a custom `fakeBaseQuery`.
-Each domain defines ONE API with `createApi`, keeping a single `reducerPath`.
-
-```typescript
-// adapters/account/account.api.ts
-import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
-import { createAccountContext } from "@core/account";
-
-function getServices() {
-  return createAccountContext();
-}
-
-export const accountApi = createApi({
-  reducerPath: "accountApi",
-  baseQuery: fakeBaseQuery(),
-  tagTypes: ["Account"],
-  endpoints: (builder) => ({
-    getAccounts: builder.query({
-      queryFn: async () => {
-        const { getAccounts } = getServices();
-        const data = await getAccounts.execute();
-        return { data };
-      },
-      providesTags: ["Account"],
-    }),
-  }),
-});
-
-export const { useGetAccountsQuery } = accountApi;
-```
-
-The store registers all API reducers and middleware in `store/index.ts`.
-{{/if}}
-
-{{#unless tanstackQuery}}{{#unless redux}}
-### Plain React (useState + useEffect)
-
-Without a state management library, adapters use local React state.
-They call use-cases directly and manage loading/error states manually.
-
-```typescript
-// adapters/account/queries/use-get-accounts.ts
-import { useAccountContext } from "../..";
-import { useEffect, useState } from "react";
-
-export function useAccounts() {
-  const { getAccounts } = useAccountContext();
-  const [accounts, setAccounts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const refetch = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getAccounts.execute();
-      setAccounts(data);
-    } catch (e) {
-      setError(e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => { refetch(); }, [getAccounts]);
-
-  return { accounts, isLoading, refetch, error };
-}
-```
-{{/unless}}{{/unless}}
 
 ## Module provider: before vs. after
 
@@ -264,4 +189,3 @@ wiring or composition. A composition factory is `*.provider.ts`, not `*DomainPro
 ### Template variables
 
 - projectName
-- stateManagement
