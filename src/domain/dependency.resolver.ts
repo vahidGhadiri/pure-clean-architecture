@@ -7,20 +7,8 @@ export class DependencyResolver {
     const dependencies: Record<string, string> = {};
     const devDependencies: Record<string, string> = {};
 
-    switch (options.stateManagement) {
-      case 'tanstack-zustand':
-        dependencies[packages.reactQuery.name] = packages.reactQuery.version;
-        dependencies[packages.zustand.name] = packages.zustand.version;
-        break;
-
-      case 'tanstack-query':
-        dependencies[packages.reactQuery.name] = packages.reactQuery.version;
-        break;
-
-      case 'redux-toolkit':
-        dependencies[packages.reduxToolkit.name] = packages.reduxToolkit.version;
-        dependencies[packages.reactRedux.name] = packages.reactRedux.version;
-        break;
+    if (options.stateManagement === 'tanstack-query') {
+      dependencies[packages.reactQuery.name] = packages.reactQuery.version;
     }
 
     if (options.tools.includes('eslint')) {
