@@ -17,3 +17,12 @@ export interface ProjectOptions {
   targetDirectory: string;
   projectName: string;
 }
+
+export interface CliFlags {
+  eslintStrictness?: string;
+  depCruiserRules?: string;
+  manager?: string;
+  tools?: string;
+  path?: string;
+  name?: string;
+}
