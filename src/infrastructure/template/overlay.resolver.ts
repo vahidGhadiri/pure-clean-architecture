@@ -13,24 +13,9 @@ export function resolveOverlays(options: ProjectOptions, templateBasePath: strin
 
   return [
     {
-      condition: options.stateManagement === 'tanstack-query' || options.stateManagement === 'tanstack-zustand',
+      condition: options.stateManagement === 'tanstack-query',
       path: path.join(overlaysDir, '+tanstack-query'),
       name: '+tanstack-query',
-    },
-    {
-      condition: options.stateManagement === 'tanstack-zustand',
-      path: path.join(overlaysDir, '+zustand'),
-      name: '+zustand',
-    },
-    {
-      condition: options.stateManagement === 'redux-toolkit',
-      path: path.join(overlaysDir, '+redux'),
-      name: '+redux',
-    },
-    {
-      condition: options.stateManagement === 'none',
-      path: path.join(overlaysDir, '+none'),
-      name: '+none',
     },
     {
       condition: options.tools.includes('eslint'),
