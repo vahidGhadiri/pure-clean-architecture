@@ -1,0 +1,407 @@
+import { useCallback, useState } from 'react';
+
+import './example.css';
+
+interface Product {
+  readonly id: string;
+  readonly name: string;
+  readonly price: number;
+}
+
+let nextId = 4;
+
+const INITIAL_PRODUCTS: Product[] = [
+  { id: '1', name: 'Mechanical Keyboard', price: 149.99 },
+  { id: '2', name: 'Ultrawide Monitor', price: 599.00 },
+  { id: '3', name: 'Ergonomic Chair', price: 389.50 },
+];
+
+const LAYERS = [
+  { id: 'presentation', label: 'Presentation', hex: '#ec4899', icon: '01' },
+  { id: 'adapter', label: 'Adapters', hex: '#f59e0b', icon: '02' },
+  { id: 'application', label: 'Application', hex: '#10b981', icon: '03' },
+  { id: 'domain', label: 'Domain', hex: '#6366f1', icon: '04' },
+  { id: 'infrastructure', label: 'Infrastructure', hex: '#a855f7', icon: '05' },
+] as const;
+
+interface StepData {
+  readonly file: string;
+  readonly snippet: string;
+  readonly output: Record<string, unknown>;
+}
+
+const buildCreateSteps = (dto: Record<string, unknown>): readonly StepData[] => [
+  {
+    file: 'src/presentation/main/pages/example/index.tsx',
+    snippet: `const handleSubmit = (e: React.FormEvent) => {\n  const dto = { id, name, price, category };\n  // starts the flow...\n};`,
+    output: dto,
+  },
+  {
+    file: 'src/adapters/product/commands/use-create-product.ts',
+    snippet: `export function useCreateProduct() {\n  const { createProduct } = useProductContext();\n\n  return useMutation({\n    mutationFn: (dto) => createProduct.execute(dto),\n    onSuccess: () => queryClient.invalidateQueries({\n      queryKey: ['products'],\n    }),\n  });\n}`,
+    output: { useMutation: { endpoint: 'createProduct.execute()', dto } },
+  },
+  {
+    file: 'src/core/product/application/use-cases/create-product.use-case.ts',
+    snippet: `export class CreateProductUseCase {\n  constructor(\n    private readonly repository: IProductRepository\n  ) {}\n\n  async execute(dto: CreateProductDto): Promise<ProductDto> {\n    return this.repository.create({\n      id: uuidv4(),\n      ...dto,\n    });\n  }\n}`,
+    output: { repository: 'create()', data: { id: dto.id, name: dto.name, price: dto.price } },
+  },
+  {
+    file: 'src/core/product/domain/product.repository.ts',
+    snippet: `export interface IProductRepository {\n  create(data: { id: string } & CreateProductData): Promise<ProductDto>;\n  update(id: string, data: UpdateProductData): Promise<ProductDto>;\n  findById(id: string): Promise<ProductDto>;\n  findAll(): Promise<ProductDto[]>;\n  delete(id: string): Promise<void>;\n}`,
+    output: { port: 'IProductRepository.create()', contract: dto },
+  },
+  {
+    file: 'src/core/product/infrastructure/product.repository.ts',
+    snippet: `export class ProductRepository implements IProductRepository {\n  constructor(\n    private readonly http: IHttp<typeof ProductEndpoints>\n  ) {}\n\n  async create(data) {\n    return this.http.request<\n      'CREATE_PRODUCT', ProductDto\n    >({\n      endpoint: 'CREATE_PRODUCT',\n      method: 'POST',\n      body: { name: data.name, price: data.price },\n    });\n  }\n}`,
+    output: { http: 'POST /api/products', body: dto },
+  },
+];
+
+const buildGetSteps = (): readonly StepData[] => [
+  {
+    file: 'src/presentation/main/pages/example/index.tsx',
+    snippet: `const { data: products, isLoading } = useProducts();`,
+    output: { useQuery: { hook: 'useProducts()', key: ['products'] } },
+  },
+  {
+    file: 'src/adapters/product/queries/use-get-products.ts',
+    snippet: `export function useProducts() {\n  const { getProducts } = useProductContext();\n\n  return useQuery({\n    queryKey: ['products'],\n    queryFn: () => getProducts.execute(),\n  });\n}`,
+    output: { useQuery: { queryFn: 'getProducts.execute()' } },
+  },
+  {
+    file: 'src/core/product/application/use-cases/get-products.use-case.ts',
+    snippet: `export class GetProductsUseCase {\n  constructor(\n    private readonly repository: IProductRepository\n  ) {}\n\n  async execute(): Promise<ProductDto[]> {\n    return this.repository.findAll();\n  }\n}`,
+    output: { repository: 'findAll()' },
+  },
+  {
+    file: 'src/core/product/domain/product.repository.ts',
+    snippet: `export interface IProductRepository {\n  create(data: { id: string } & CreateProductData): Promise<ProductDto>;\n  findById(id: string): Promise<ProductDto>;\n  findAll(): Promise<ProductDto[]>;\n  delete(id: string): Promise<void>;\n}`,
+    output: { port: 'IProductRepository.findAll()', contract: {} },
+  },
+  {
+    file: 'src/core/product/infrastructure/product.repository.ts',
+    snippet: `export class ProductRepository implements IProductRepository {\n  constructor(\n    private readonly http: IHttp<typeof ProductEndpoints>\n  ) {}\n\n  async findAll() {\n    return this.http.request<\n      'GET_PRODUCTS', ProductDto[]\n    >({\n      endpoint: 'GET_PRODUCTS',\n      method: 'GET',\n    });\n  }\n}`,
+    output: { http: 'GET /api/products' },
+  },
+];
+
+type FlowTab = 'create' | 'get';
+
+const Example = () => {
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [activeStep, setActiveStep] = useState(-1);
+  const [steps, setSteps] = useState<readonly StepData[]>([]);
+  const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<FlowTab>('create');
+
+  const reset = useCallback(() => {
+    setActiveStep(-1);
+    setSteps([]);
+    setError('');
+  }, []);
+
+  const switchTab = useCallback(
+    (tab: FlowTab) => {
+      reset();
+      setActiveTab(tab);
+    },
+    [reset],
+  );
+
+  const handleCreate = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      const trimmedName = name.trim();
+      const parsedPrice = Number(price);
+
+      if (!trimmedName) {
+        setError('Product name is required');
+        return;
+      }
+      if (!parsedPrice || parsedPrice <= 0) {
+        setError('Price must be a positive number');
+        return;
+      }
+
+      setError('');
+      const id = String(nextId++);
+      const dto = { id, name: trimmedName, price: parsedPrice, category: 'ELECTRONICS' };
+      setSteps(buildCreateSteps(dto));
+      setActiveStep(0);
+      setProducts((prev) => [...prev, { id, name: trimmedName, price: parsedPrice }]);
+      setName('');
+      setPrice('');
+    },
+    [name, price],
+  );
+
+  const handleGet = useCallback(() => {
+    reset();
+    setSteps(buildGetSteps());
+    setActiveStep(0);
+  }, [reset]);
+
+  const nextStep = useCallback(() => {
+    if (activeStep < steps.length - 1) {
+      setActiveStep((s) => s + 1);
+    }
+  }, [activeStep, steps.length]);
+
+  const prevStep = useCallback(() => {
+    if (activeStep > 0) {
+      setActiveStep((s) => s - 1);
+    }
+  }, [activeStep]);
+
+  const isRunning = activeStep >= 0;
+  const isDone = activeStep === steps.length - 1 && isRunning;
+
+  return (
+    <div className="example">
+      <div className="example-glow" />
+
+      <section className="example-hero">
+        <div className="example-hero-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          Interactive Demo
+        </div>
+        <h1 className="example-title">See Clean Architecture in Action</h1>
+        <p className="example-desc">
+          Create or fetch a product and step through each layer at your own pace.
+        </p>
+      </section>
+
+      <section className="example-demo">
+        <div className="demo-left">
+          <div className="demo-tabs">
+            <button
+              type="button"
+              className={`demo-tab ${activeTab === 'create' ? 'demo-tab-active' : ''}`}
+              onClick={() => switchTab('create')}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Create
+            </button>
+            <button
+              type="button"
+              className={`demo-tab ${activeTab === 'get' ? 'demo-tab-active' : ''}`}
+              onClick={() => switchTab('get')}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              Get All
+            </button>
+          </div>
+
+          <div className="demo-card">
+            <div className="demo-card-header">
+              <h3>{activeTab === 'create' ? 'Create Product' : 'Get Products'}</h3>
+              {isRunning && (
+                <button type="button" className="demo-reset" onClick={reset}>
+                  Reset
+                </button>
+              )}
+            </div>
+
+            {activeTab === 'create' && !isRunning && (
+              <form className="demo-form" onSubmit={handleCreate}>
+                <div className="demo-field">
+                  <label htmlFor="product-name">Name</label>
+                  <input
+                    id="product-name"
+                    type="text"
+                    placeholder="e.g. Wireless Mouse"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div className="demo-field">
+                  <label htmlFor="product-price">Price ($)</label>
+                  <input
+                    id="product-price"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="29.99"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                  />
+                </div>
+                {error && <div className="demo-error">{error}</div>}
+                <button type="submit" className="demo-submit">
+                  Create Product
+                </button>
+              </form>
+            )}
+
+            {activeTab === 'get' && !isRunning && (
+              <div className="demo-get">
+                <p className="demo-get-desc">
+                  Fetch all products from the repository — step through the query flow.
+                </p>
+                <button type="button" className="demo-submit" onClick={handleGet}>
+                  Fetch Products
+                </button>
+              </div>
+            )}
+
+            {isRunning && (
+              <div className="demo-stepper">
+                <div className="stepper-progress">
+                  <div className="stepper-track">
+                    <div
+                      className="stepper-fill"
+                      style={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="stepper-row">
+                  <span className="stepper-step">
+                    Step {activeStep + 1} of {steps.length}
+                  </span>
+                  <div className="stepper-actions">
+                    <button
+                      type="button"
+                      className="stepper-btn"
+                      onClick={prevStep}
+                      disabled={activeStep === 0}
+                    >
+                      Prev
+                    </button>
+                    {!isDone ? (
+                      <button
+                        type="button"
+                        className="stepper-btn stepper-btn-next"
+                        onClick={nextStep}
+                      >
+                        Next
+                      </button>
+                    ) : (
+                      <span className="stepper-done-badge">Done</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="demo-list">
+              <div className="demo-list-header">
+                <h4>Products</h4>
+                <span className="demo-list-count">{products.length}</span>
+              </div>
+              {products.map((p) => (
+                <div key={p.id} className="demo-list-item">
+                  <span className="demo-list-name">{p.name}</span>
+                  <span className="demo-list-price">${p.price.toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="demo-right">
+          <div className="flow-pipeline">
+            {LAYERS.map((layer, i) => {
+              const isActive = activeStep === i;
+              const isPast = activeStep > i;
+              const isFuture = activeStep < i || activeStep === -1;
+              return (
+                <div key={layer.id} className="pipeline-group">
+                  <div
+                    className={[
+                      'pipeline-node',
+                      isActive && 'pipeline-node-active',
+                      isPast && 'pipeline-node-past',
+                      isFuture && 'pipeline-node-future',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    style={{ '--node-hex': layer.hex } as React.CSSProperties}
+                  >
+                    <div className="pipeline-icon">{layer.icon}</div>
+                    <div className="pipeline-label">{layer.label}</div>
+                  </div>
+                  {i < LAYERS.length - 1 && (
+                    <div
+                      className={[
+                        'pipeline-arrow',
+                        isPast && 'pipeline-arrow-past',
+                        isActive && 'pipeline-arrow-active',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flow-log">
+            {!isRunning && (
+              <div className="flow-log-empty">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <span>{activeTab === 'create' ? 'Submit the form, then step through each layer' : 'Click Fetch, then step through each layer'}</span>
+              </div>
+            )}
+
+            {isRunning && steps[activeStep] && (
+              <div className="flow-log-entry" key={activeStep}>
+                <div className="log-entry-header">
+                  <span
+                    className="log-entry-dot"
+                    style={{ background: LAYERS[activeStep]?.hex }}
+                  />
+                  <span className="log-entry-layer">
+                    {LAYERS[activeStep]?.label}
+                  </span>
+                  <code className="log-entry-file">{steps[activeStep]?.file}</code>
+                </div>
+                <pre className="log-entry-code">
+                  <code>{steps[activeStep]?.snippet}</code>
+                </pre>
+                <div className="log-entry-output">
+                  <span className="log-entry-output-label">Output</span>
+                  <pre className="log-entry-output-code">
+                    <code>{JSON.stringify(steps[activeStep]?.output, null, 2)}</code>
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {isDone && (
+              <div className="flow-log-entry flow-log-done">
+                <div className="log-entry-header">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span className="log-entry-layer" style={{ color: '#34d399' }}>
+                    {activeTab === 'create' ? 'Product created successfully' : 'Products fetched successfully'}
+                  </span>
+                </div>
+                <p className="log-entry-desc">
+                  The {activeTab === 'create' ? 'request' : 'query'} traveled through all 5 layers and back — zero coupling between layers.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Example;

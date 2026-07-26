@@ -1,0 +1,186 @@
+import './home.css';
+
+const FEATURES = [
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M2 12l10 5 10-5" />
+      </svg>
+    ),
+    title: 'Layered Architecture',
+    desc: 'Strict dependency rule enforced at build time. Domain knows nothing about the outside world.',
+    color: 'var(--color-domain)',
+  },
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+        <polyline points="10 9 9 9 8 9" />
+      </svg>
+    ),
+    title: 'Typed Contracts',
+    desc: 'Repository interfaces in domain, DTOs in application. Compile-time guarantees across all layers.',
+    color: 'var(--color-application)',
+  },
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M3 9h18" />
+        <path d="M9 21V9" />
+      </svg>
+    ),
+    title: 'Module System',
+    desc: 'Each domain is a self-contained module with its own layers. Add new domains without touching existing code.',
+    color: 'var(--color-infrastructure)',
+  },
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+      </svg>
+    ),
+    title: 'Zero Boilerplate',
+    desc: 'CLI generates the full project structure, providers, and wiring. Start building features immediately.',
+    color: 'var(--color-success)',
+  },
+];
+
+const Home = () => {
+  return (
+    <div className="home">
+      <div className="home-grid-bg" />
+      <div className="home-glow home-glow-1" />
+      <div className="home-glow home-glow-2" />
+      <div className="home-glow home-glow-3" />
+
+      <section className="hero">
+        <div className="hero-badge">
+          <span className="hero-dot" />
+          Production-Ready Scaffold
+        </div>
+
+        <h1 className="hero-title">
+          Build with
+          <br />
+          <span className="hero-gradient">my-app</span>
+        </h1>
+
+        <p className="hero-desc">
+          A React application built with strict Clean Architecture principles.
+          Typed contracts, scalable layers, and zero compromise on separation of concerns.
+        </p>
+
+        <div className="hero-actions">
+          <a href="/example" className="hero-btn hero-btn-primary">
+            Try Interactive Demo
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </a>
+          <a href="/architecture" className="hero-btn hero-btn-secondary">
+            View Architecture
+          </a>
+        </div>
+
+        <div className="hero-chips">
+          <span className="chip">React 19</span>
+          <span className="chip">TypeScript</span>
+          <span className="chip">Vite</span>
+          <span className="chip chip-accent">TanStack Query</span>
+          <span className="chip">Clean Architecture</span>
+        </div>
+
+        <div className="hero-meta">
+          <span className="meta">whydrf</span>
+          <span className="meta-dot" />
+          <span className="meta">pnpm</span>
+          <span className="meta-dot" />
+          <span className="meta">ESLint recommended</span>
+        </div>
+      </section>
+
+      <section className="cli-section">
+        <div className="cli-card">
+          <div className="cli-header">
+            <div className="cli-dots">
+              <span /><span /><span />
+            </div>
+            <span className="cli-title">Terminal</span>
+          </div>
+          <div className="cli-body">
+            <div className="cli-line">
+              <span className="cli-prompt">$</span>
+              <span className="cli-command">npx pure-clean-architecture</span>
+            </div>
+            <div className="cli-line cli-output">
+              <span className="cli-success">? Project name</span>
+              <span className="cli-value"> my-app</span>
+            </div>
+            <div className="cli-line cli-output">
+              <span className="cli-success">? Package manager</span>
+              <span className="cli-value"> pnpm</span>
+            </div>
+            <div className="cli-line cli-output">
+              <span className="cli-success">? State management</span>
+              <span className="cli-value"> TanStack Query</span>
+            </div>
+            <div className="cli-line cli-output">
+              <span className="cli-success">? Dev tools</span>
+              <span className="cli-value"> ESLint + Dependency Cruiser</span>
+            </div>
+            <div className="cli-line cli-dim">
+              {'\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'}
+            </div>
+            <div className="cli-line cli-output">
+              <span className="cli-success">Scaffolding project...</span>
+            </div>
+            <div className="cli-line cli-output">
+              <span className="cli-success">Installing dependencies...</span>
+            </div>
+            <div className="cli-line">
+              <span className="cli-prompt">$</span>
+              <span className="cli-command">cd my-app && pnpm dev</span>
+            </div>
+            <div className="cli-line cli-output cli-success-line">
+              <span className="cli-arrow">{'\u25B6'}</span>
+              Ready on http://localhost:5173
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="features">
+        <div className="features-header">
+          <span className="flow-label">Why Clean Architecture</span>
+          <h2 className="section-title">Built for Scale</h2>
+          <p className="section-desc">
+            Every decision optimized for maintainability, testability, and team velocity.
+          </p>
+        </div>
+
+        <div className="features-grid">
+          {FEATURES.map((f, i) => (
+            <div key={i} className="feature-card" style={{ animationDelay: `${i * 0.08}s` }}>
+              <div className="feature-head">
+                <div className="feature-icon" style={{ color: f.color, background: `color-mix(in srgb, ${f.color} 10%, transparent)` }}>
+                  {f.icon}
+                </div>
+                <h3>{f.title}</h3>
+              </div>
+              <p>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Home;

@@ -51,7 +51,6 @@ const presentationLayer: LayerInfo = {
   path: 'src/presentation',
 };
 
-{{#if tanstackQuery}}
 const adaptersLayer: LayerInfo = {
   id: 'adapters',
   name: 'Adapters',
@@ -81,37 +80,6 @@ const adaptersLayer: LayerInfo = {
   ],
   path: 'src/adapters',
 };
-{{else}}
-const adaptersLayer: LayerInfo = {
-  id: 'adapters',
-  name: 'Adapters',
-  hex: '#f59e0b',
-  subtitle: 'Custom React Hooks',
-  description:
-    'Bridge between Presentation and the Bounded Context. Custom useQuery/useMutation hooks call use cases directly and manage loading/error/state with pure React hooks. No external state library — zero bundle overhead.',
-  files: [
-    'Commands — useCreateAccount (wrapping mutations)',
-    'Queries — useAccounts (wrapping queries)',
-    'Shared — Reusable useQuery/useMutation primitives',
-    'Cache — In-memory cache with configurable TTL',
-  ],
-  techDetails: [
-    { label: 'State Manager', value: 'None — pure React hooks' },
-    { label: 'Caching', value: 'In-memory Map with configurable TTL per query key' },
-    { label: 'Mutations', value: 'useMutation with onSuccess/onError callbacks' },
-    { label: 'Loading State', value: 'Derived from async operation status' },
-    { label: 'DI Pattern', value: 'React Context wrapping bounded context factories' },
-    { label: 'Bundle Size', value: 'Zero additional dependencies' },
-  ],
-  rules: [
-    'Always resolve use case from context — never instantiate directly',
-    'Every adapter hook maps one use case one-to-one',
-    'Handle loading, error, and success states consistently',
-    'Use shared useQuery/useMutation for DRY caching logic',
-  ],
-  path: 'src/adapters',
-};
-{{/if}}
 
 const applicationLayer: LayerInfo = {
   id: 'application',
@@ -233,7 +201,7 @@ const Architecture = () => {
 
       <section className="arch-explorer">
         <div className="explorer-diagram">
-          <div className="rings-stack" style=\{{ '--active-hex': active.hex } as React.CSSProperties}>
+          <div className="rings-stack" style={{ '--active-hex': active.hex } as React.CSSProperties}>
             {[...layers].reverse().map((layer) => {
               const isActive = selected === layer.id;
               const isDimmed = selected !== layer.id;
@@ -249,7 +217,7 @@ const Architecture = () => {
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  style=\{{ '--ring-hex': layer.hex } as React.CSSProperties}
+                  style={{ '--ring-hex': layer.hex } as React.CSSProperties}
                   onClick={() => setSelected(layer.id)}
                 >
                   <span className="ring-label">{layer.name}</span>
@@ -266,7 +234,7 @@ const Architecture = () => {
 
         <div className="explorer-detail" key={active.id}>
           <div className="detail-header">
-            <div className="detail-badge" style=\{{ color: active.hex, background: `${active.hex}1a` }}>
+            <div className="detail-badge" style={{ color: active.hex, background: `${active.hex}1a` }}>
               {active.name}
             </div>
             <code className="detail-path">{active.path}</code>
