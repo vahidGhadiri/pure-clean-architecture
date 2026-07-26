@@ -42,6 +42,12 @@ const Layout = () => {
                             Architecture
                         </NavLink>
                         <NavLink
+                            to="/example"
+                            className={({ isActive }) => `nav-link ${isActive ? 'nav-link-active' : ''}`}
+                        >
+                            Example
+                        </NavLink>
+                        <NavLink
                             to="/contact"
                             className={({ isActive }) => `nav-link ${isActive ? 'nav-link-active' : ''}`}
                         >

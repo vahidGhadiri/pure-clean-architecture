@@ -4,6 +4,11 @@ import './architecture.css';
 
 type LayerId = 'presentation' | 'adapters' | 'application' | 'domain' | 'infrastructure';
 
+interface TechDetail {
+  readonly label: string;
+  readonly value: string;
+}
+
 interface LayerInfo {
   readonly id: LayerId;
   readonly name: string;
@@ -11,8 +16,8 @@ interface LayerInfo {
   readonly subtitle: string;
   readonly description: string;
   readonly files: readonly string[];
-  readonly exampleTitle: string;
-  readonly example: string;
+  readonly techDetails: readonly TechDetail[];
+  readonly rules: readonly string[];
   readonly path: string;
 }
 
@@ -29,22 +34,20 @@ const presentationLayer: LayerInfo = {
     'Routes — React Router configuration with lazy loading',
     'Styles — CSS modules or Tailwind classes',
   ],
-  exampleTitle: 'Page Component',
-  example: `import { useAccounts } from '@adapters/account';
-
-function AccountList() {
-  const { accounts, isLoading } = useAccounts();
-
-  if (isLoading) return <Spinner />;
-
-  return (
-    <ul>
-      {accounts.map((a) => (
-        <li key={a.id}>{a.holderName}</li>
-      ))}
-    </ul>
-  );
-}`,
+  techDetails: [
+    { label: 'Framework', value: 'React 19 + TypeScript' },
+    { label: 'Routing', value: 'React Router v7 with lazy() code splitting' },
+    { label: 'Styling', value: 'CSS Modules / Tailwind CSS' },
+    { label: 'State', value: 'Local useState/useReducer only — no global state' },
+    { label: 'Data Access', value: 'Adapter hooks (useAccounts, useCreateProduct)' },
+    { label: 'Rendering', value: 'Server-compatible with strict mode enabled' },
+  ],
+  rules: [
+    'Never import from core/ or infrastructure/',
+    'Delegate all data fetching to adapter hooks',
+    'Components receive data via props — no side effects',
+    'All pages use React.lazy() for code splitting',
+  ],
   path: 'src/presentation',
 };
 
@@ -62,101 +65,21 @@ const adaptersLayer: LayerInfo = {
     'Query Keys — Cache invalidation strategies per entity',
     'Context — useAccountContext for dependency injection',
   ],
-  exampleTitle: 'Query Adapter — useAccounts',
-  example: `import { useQuery } from '@tanstack/react-query';
-import { useAccountContext } from '../..';
-
-const ACCOUNT_KEY = ['accounts'];
-
-export function useAccounts() {
-  const { getAccounts } = useAccountContext();
-
-  const { isLoading, data, error } = useQuery({
-    queryFn: () => getAccounts.execute(),
-    queryKey: ACCOUNT_KEY,
-  });
-
-  return { accounts: data ?? [], isLoading, error };
-}`,
-  path: 'src/adapters',
-};
-{{else if redux}}
-const adaptersLayer: LayerInfo = {
-  id: 'adapters',
-  name: 'Adapters',
-  hex: '#f59e0b',
-  subtitle: 'Redux Toolkit (RTK Query)',
-  description:
-    'Bridge between Presentation and the Bounded Context. Each entity defines a createApi slice with fakeBaseQuery. Endpoints delegate to use cases via the module\'s public API. Tag-based cache invalidation keeps the store synchronized.',
-  files: [
-    'API Slices — createApi per entity with endpoints',
-    'Mutations — createAccount, updateAccount with tags',
-    'Queries — getAccounts with providesTags',
-    'Store — Redux store combining all API reducers',
+  techDetails: [
+    { label: 'State Manager', value: 'TanStack Query v5' },
+    { label: 'Caching', value: 'Stale-while-revalidate with configurable gcTime' },
+    { label: 'Mutations', value: 'useMutation with automatic query invalidation' },
+    { label: 'Query Keys', value: 'Entity-scoped arrays: ["accounts"], ["accounts", id]' },
+    { label: 'DI Pattern', value: 'React Context wrapping bounded context factories' },
+    { label: 'Optimistic Updates', value: 'onMutate callback + queryClient.setQueryData' },
   ],
-  exampleTitle: 'RTK Query Adapter — accountApi',
-  example: `import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
-import { createAccountContext } from '@core/account';
-
-function getServices() {
-  return createAccountContext();
-}
-
-export const accountApi = createApi({
-  reducerPath: 'accountApi',
-  baseQuery: fakeBaseQuery(),
-  tagTypes: ['Account'],
-  endpoints: (builder) => ({
-    getAccounts: builder.query<AccountDto[], void>({
-      queryFn: async () => {
-        const { getAccounts } = getServices();
-        return { data: await getAccounts.execute() };
-      },
-      providesTags: ['Account'],
-    }),
-  }),
-});`,
-  path: 'src/adapters',
-};
-{{else if zustand}}
-const adaptersLayer: LayerInfo = {
-  id: 'adapters',
-  name: 'Adapters',
-  hex: '#f59e0b',
-  subtitle: 'Zustand Store + Hooks',
-  description:
-    'Bridge between Presentation and the Bounded Context. Adapter hooks call use cases and manage UI state. Zustand handles global client state (theme, sidebar) with a factory pattern for test isolation. Server state flows through adapter hooks.',
-  files: [
-    'Store — Zustand factory with typed selectors',
-    'Hooks — useCreateAccount, useAccounts (wrapping use cases)',
-    'UI State — Theme, sidebar, user preferences',
-    'Selectors — Memoized derived state',
+  rules: [
+    'Always resolve use case from context — never instantiate directly',
+    'Wrap every use case call in useQuery or useMutation',
+    'Define query keys as typed constants per entity',
+    'Invalidate related queries after successful mutations',
   ],
-  exampleTitle: 'Zustand Store — createAppStore',
-  example: `import { create } from 'zustand';
-
-type Theme = 'light' | 'dark' | 'system';
-
-interface UIState {
-  readonly sidebarOpen: boolean;
-  readonly theme: Theme;
-  readonly setSidebarOpen: (open: boolean) => void;
-  readonly toggleSidebar: () => void;
-  readonly setTheme: (theme: Theme) => void;
-}
-
-export function createAppStore() {
-  return create<UIState>((set) => ({
-    sidebarOpen: false,
-    theme: 'system',
-    setSidebarOpen: (open) => set({ sidebarOpen: open }),
-    toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
-    setTheme: (theme) => set({ theme }),
-  }));
-}
-
-export const useAppStore = createAppStore();`,
-  path: 'src/adapters + src/store',
+  path: 'src/adapters',
 };
 {{else}}
 const adaptersLayer: LayerInfo = {
@@ -172,20 +95,20 @@ const adaptersLayer: LayerInfo = {
     'Shared — Reusable useQuery/useMutation primitives',
     'Cache — In-memory cache with configurable TTL',
   ],
-  exampleTitle: 'Custom Hook — useCreateAccount',
-  example: `import type { CreateAccountDto, AccountDto } from '@core/account';
-import { createAccountContext } from '@core/account';
-import { useMutation } from '../../shared';
-
-export function useCreateAccount() {
-  const { createAccount } = createAccountContext();
-  return useMutation<CreateAccountDto, AccountDto>(
-    (dto) => createAccount.execute(dto)
-  );
-}
-
-// Shared useMutation handles:
-// loading, error, reset, onSuccess, onError`,
+  techDetails: [
+    { label: 'State Manager', value: 'None — pure React hooks' },
+    { label: 'Caching', value: 'In-memory Map with configurable TTL per query key' },
+    { label: 'Mutations', value: 'useMutation with onSuccess/onError callbacks' },
+    { label: 'Loading State', value: 'Derived from async operation status' },
+    { label: 'DI Pattern', value: 'React Context wrapping bounded context factories' },
+    { label: 'Bundle Size', value: 'Zero additional dependencies' },
+  ],
+  rules: [
+    'Always resolve use case from context — never instantiate directly',
+    'Every adapter hook maps one use case one-to-one',
+    'Handle loading, error, and success states consistently',
+    'Use shared useQuery/useMutation for DRY caching logic',
+  ],
   path: 'src/adapters',
 };
 {{/if}}
@@ -202,24 +125,20 @@ const applicationLayer: LayerInfo = {
     'DTOs — Input/output typed shapes',
     'Ports — Receives repository interface via constructor',
   ],
-  exampleTitle: 'CreateAccountUseCase',
-  example: `import type { CreateAccountDto, AccountDto } from '../../domain';
-import type { IAccountRepository } from '../../domain';
-
-export class CreateAccountUseCase {
-  constructor(
-    private readonly repository: IAccountRepository
-  ) {}
-
-  async execute(dto: CreateAccountDto): Promise<AccountDto> {
-    return this.repository.create({
-      id: crypto.randomUUID(),
-      holderName: dto.holderName,
-      balance: dto.initialBalance,
-      type: dto.type,
-    });
-  }
-}`,
+  techDetails: [
+    { label: 'Pattern', value: 'Single Responsibility — one class per use case' },
+    { label: 'Dependencies', value: 'Domain interfaces only (repository ports)' },
+    { label: 'DI', value: 'Constructor injection with typed port interfaces' },
+    { label: 'Error Handling', value: 'Result<T> type — no thrown exceptions' },
+    { label: 'Input/Output', value: 'DTOs defined in domain layer' },
+    { label: 'Testing', value: 'Unit test with mock repository — no I/O' },
+  ],
+  rules: [
+    'Never import from adapters/, presentation/, or infrastructure/',
+    'Receive repository port via constructor — never instantiate',
+    'One use case class per business operation',
+    'Return Result<T> instead of throwing errors',
+  ],
   path: 'src/core/*/application',
 };
 
@@ -236,23 +155,20 @@ const domainLayer: LayerInfo = {
     'Types — AccountType enum, domain-specific values',
     'Zero external imports — pure TypeScript only',
   ],
-  exampleTitle: 'Repository Port — IAccountRepository',
-  example: `export type AccountType = 'CHECKING' | 'SAVINGS';
-
-export interface AccountDto {
-  readonly holderName: string;
-  readonly type: AccountType;
-  readonly balance: number;
-  readonly id: string;
-}
-
-export interface IAccountRepository {
-  create(data: CreateAccountData): Promise<AccountDto>;
-  update(id: string, data: UpdateData): Promise<AccountDto>;
-  findById(id: string): Promise<AccountDto>;
-  findAll(): Promise<AccountDto[]>;
-  delete(id: string): Promise<void>;
-}`,
+  techDetails: [
+    { label: 'Dependencies', value: 'Zero — pure TypeScript types only' },
+    { label: 'DTOs', value: 'Readonly interfaces with branded types where needed' },
+    { label: 'Ports', value: 'Repository interfaces defining CRUD contracts' },
+    { label: 'Enums', value: 'Const enums for domain-specific values' },
+    { label: 'Validation', value: 'Zod schemas co-located with DTOs' },
+    { label: 'Tree-Shaking', value: 'Full — no runtime code, types only' },
+  ],
+  rules: [
+    'Zero imports from any other layer or external library',
+    'Define interfaces for what the business needs — not how',
+    'Use readonly properties on all DTOs',
+    'Co-locate Zod schemas with their DTO definitions',
+  ],
   path: 'src/core/*/domain',
 };
 
@@ -269,29 +185,20 @@ const infrastructureLayer: LayerInfo = {
     'HTTP Client — Typed request/response via shared kernel',
     'Storage — Cache persistence via shared kernel',
   ],
-  exampleTitle: 'AccountRepository — HTTP Implementation',
-  example: `export class AccountRepository implements IAccountRepository {
-  constructor(
-    private readonly http: IHttp<typeof AccountEndpoints>,
-    private readonly storage: IStorage
-  ) {}
-
-  async findAll(): Promise<AccountDto[]> {
-    const cached = this.storage.getStorageData<AccountDto[]>({
-      isPersisted: true, key: 'accounts',
-    });
-    if (cached) return cached;
-
-    const accounts = await this.http.request<
-      'GET_ACCOUNTS', AccountDto[]
-    >({ endpoint: 'GET_ACCOUNTS', method: 'GET' });
-
-    this.storage.setStorageData({
-      isPersisted: true, key: 'accounts', value: accounts,
-    });
-    return accounts;
-  }
-}`,
+  techDetails: [
+    { label: 'HTTP Client', value: 'Typed fetch wrapper with request/response generics' },
+    { label: 'Storage', value: 'LocalStorage + session with type-safe get/set' },
+    { label: 'Endpoints', value: 'Const object mapping action → URL + method' },
+    { label: 'Error Mapping', value: 'HTTP status → domain error codes' },
+    { label: 'Interceptors', value: 'Request/response middleware via HOF pattern' },
+    { label: 'Swap Cost', value: 'Change one file to switch API providers' },
+  ],
+  rules: [
+    'Implement domain repository interfaces — nothing else',
+    'All HTTP calls go through the shared typed client',
+    'Map HTTP errors to domain Result error codes',
+    'Endpoint definitions are static const objects per entity',
+  ],
   path: 'src/core/*/infrastructure',
 };
 
@@ -321,7 +228,7 @@ const Architecture = () => {
           Clean Architecture
         </div>
         <h1 className="arch-title">Architecture Deep Dive</h1>
-        <p className="arch-desc">Click on any layer to explore its responsibilities, contents, and code examples.</p>
+        <p className="arch-desc">Click on any layer to explore its responsibilities, tech stack, and constraints.</p>
       </section>
 
       <section className="arch-explorer">
@@ -368,6 +275,18 @@ const Architecture = () => {
           <h2 className="detail-subtitle">{active.subtitle}</h2>
           <p className="detail-desc">{active.description}</p>
 
+          <div className="detail-tech">
+            <h4>Tech Details</h4>
+            <div className="tech-grid">
+              {active.techDetails.map((t) => (
+                <div key={t.label} className="tech-item">
+                  <span className="tech-label">{t.label}</span>
+                  <span className="tech-value">{t.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="detail-files">
             <h4>What goes here</h4>
             <ul>
@@ -377,11 +296,13 @@ const Architecture = () => {
             </ul>
           </div>
 
-          <div className="detail-example">
-            <div className="example-header">{active.exampleTitle}</div>
-            <pre>
-              <code>{active.example}</code>
-            </pre>
+          <div className="detail-rules">
+            <h4>Rules & Constraints</h4>
+            <ul>
+              {active.rules.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
