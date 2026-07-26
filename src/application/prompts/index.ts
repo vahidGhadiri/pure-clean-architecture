@@ -1,5 +1,4 @@
 export { dependencyCruiserConfigPrompt } from './dependency-cruiser-config.prompt.js';
-export { stateManagementPrompt } from './state-management.prompt.js';
 export { createProjectOptions } from './create-project-options.js';
 export { packageManagerPrompt } from './package-manager.prompt.js';
 export { installDependenciesPrompt } from './install.prompt.js';
