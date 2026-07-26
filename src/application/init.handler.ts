@@ -11,6 +11,7 @@ import { InstallerService } from '../infrastructure/package-manager/installer.se
 import { DependencyTransformer } from '../shared/transformers/dependency.transformer.js';
 import { GitServiceWrapper } from '../infrastructure/git/git.service.wrapper.js';
 import { GitService } from '../infrastructure/git/git.service.js';
+import type { CliFlags } from '../domain/project.options.js';
 
 interface InitHandlerDeps {
   dependencyResolver: IDependencyResolver;
@@ -24,8 +25,8 @@ interface InitHandlerDeps {
 export class InitHandler {
   constructor(private readonly deps: InitHandlerDeps) {}
 
-  async execute(): Promise<void> {
-    const options = await createProjectOptions();
+  async execute(flags?: CliFlags): Promise<void> {
+    const options = await createProjectOptions(flags);
     const projectPath = `${options.targetDirectory}/${options.projectName}`;
 
     this.deps.terminal.step(1, 3, 'Resolving template...');
