@@ -7,6 +7,10 @@ export function handleError(error: unknown): never {
   if (error instanceof BaseError) {
     console.error(pc.red(`\n${error.name}: ${error.message}`));
 
+    if (error.cause instanceof Error) {
+      console.error(pc.dim(`  ${error.cause.message}`));
+    }
+
     if (error.suggestion) {
       console.error(pc.dim(`  Suggestion: ${error.suggestion}`));
     }
