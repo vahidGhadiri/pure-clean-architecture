@@ -1,6 +1,6 @@
 export type PackageManager = 'pnpm' | 'yarn' | 'npm';
 
-export type StateManagement = 'tanstack-zustand' | 'tanstack-query' | 'redux-toolkit' | 'none';
+export type StateManagement = 'tanstack-query' | 'none';
 
 export type DevelopmentTool = 'dependency-cruiser' | 'eslint';
 
