@@ -14,24 +14,9 @@ export const packages = {
     version: '^5.0.0',
   },
 
-  reduxToolkit: {
-    name: '@reduxjs/toolkit',
-    version: '^2.0.0',
-  },
-
-  reactRedux: {
-    name: 'react-redux',
-    version: '^9.0.0',
-  },
-
   eslintJs: {
     name: '@eslint/js',
     version: '^9.0.0',
-  },
-
-  zustand: {
-    version: '^5.0.0',
-    name: 'zustand',
   },
 
   eslint: {
