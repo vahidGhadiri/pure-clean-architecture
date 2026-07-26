@@ -1,6 +1,11 @@
 import { text } from '@clack/prompts';
 
-export async function projectPrompt() {
+interface ProjectPromptDefaults {
+  defaultPath?: string;
+  defaultName?: string;
+}
+
+export async function projectPrompt(defaults?: ProjectPromptDefaults) {
   const projectName = await text({
     validate(value) {
       if (value !== undefined) {
@@ -11,15 +16,15 @@ export async function projectPrompt() {
 
       return undefined;
     },
+    defaultValue: defaults?.defaultName ?? 'my-app',
+    placeholder: defaults?.defaultName ?? 'my-app',
     message: 'What is your project name?',
-    defaultValue: 'my-app',
-    placeholder: 'my-app',
   });
 
   const targetDirectory = await text({
+    placeholder: defaults?.defaultName ? `./${defaults.defaultName}` : './my-app',
     message: 'Where should we create the project?',
-    placeholder: './my-app',
-    defaultValue: './',
+    defaultValue: defaults?.defaultPath ?? './',
   });
 
   return {
