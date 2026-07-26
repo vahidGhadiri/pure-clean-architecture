@@ -2,7 +2,6 @@ import { isCancel } from '@clack/prompts';
 
 import {
   dependencyCruiserConfigPrompt,
-  stateManagementPrompt,
   packageManagerPrompt,
   eslintConfigPrompt,
   projectPrompt,
@@ -20,12 +19,6 @@ export async function createProjectOptions(): Promise<ProjectOptions> {
   const packageManager = await packageManagerPrompt();
 
   if (isCancel(packageManager)) {
-    throw new Error('Project creation cancelled');
-  }
-
-  const stateManagement = await stateManagementPrompt();
-
-  if (isCancel(stateManagement)) {
     throw new Error('Project creation cancelled');
   }
 
@@ -54,10 +47,10 @@ export async function createProjectOptions(): Promise<ProjectOptions> {
 
   return {
     targetDirectory: project.targetDirectory,
+    stateManagement: 'tanstack-query',
     projectName: project.projectName,
     dependencyCruiserRules,
     eslintStrictness,
-    stateManagement,
     packageManager,
     tools,
   };
