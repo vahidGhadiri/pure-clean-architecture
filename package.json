@@ -14,7 +14,10 @@
         "lint:check": "eslint .",
         "lint:fix": "eslint . --fix",
         "format:check": "prettier --check .",
-        "types:fix": "eslint src --fix"
+        "types:fix": "eslint src --fix",
+        "depcruise": "depcruise src --config .dependency-cruiser.cjs",
+        "depcruise:graph": "depcruise src --config .dependency-cruiser.cjs --output-type dot | dot -T svg > dep-graph.svg",
+        "depcruise:html": "depcruise src --config .dependency-cruiser.cjs --output-type html"
     },
     "author": "",
     "license": "ISC",
@@ -35,6 +38,7 @@
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@vitest/eslint-plugin": "^1.0.0",
+        "dependency-cruiser": "^18.1.0",
         "eslint": "^9.39.0",
         "eslint-config-next": "^16.0.1",
         "eslint-plugin-perfectionist": "^4.15.0",
