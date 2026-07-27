@@ -1,52 +1,372 @@
 /** @type {import('dependency-cruiser').Configuration} */
 module.exports = {
   forbidden: [
-{{#if (eq dependencyCruiserRules "no-circular")}}
+    // ── Minimal: core enforcement present in ALL levels ─────────────────────
+    // Domain isolation, no circulars, no spec imports, no broken imports.
+{{#if (eq dependencyCruiserRules "minimal")}}
     {
       name: "no-circular",
       severity: "error",
       from: {},
       to: { circular: true },
     },
+    {
+      name: "clean-domain-is-isolated",
+      severity: "error",
+      comment: "Domain is the innermost layer and must not depend on any other layer.",
+      from: { path: "^src/domain(/|$)" },
+      to: {
+        path: [
+          "^src/shared(/|$)",
+          "^src/application(/|$)",
+          "^src/infrastructure(/|$)",
+          "^src/composition(/|$)",
+          "^src/presentation(/|$)",
+          "^src/main[.]ts$",
+        ],
+      },
+    },
+    {
+      name: "no-spec-imports",
+      severity: "error",
+      from: {},
+      to: { path: "[.](?:spec|test)[.](?:js|mjs|cjs|jsx|ts|mts|cts|tsx)$" },
+    },
+    {
+      name: "not-to-unresolvable",
+      severity: "error",
+      from: {},
+      to: { couldNotResolve: true },
+    },
+    {
+      name: "no-non-package-json",
+      severity: "error",
+      from: {},
+      to: { dependencyTypes: ["npm-no-pkg", "npm-unknown"] },
+    },
 {{/if}}
+
+    // ── Recommended: all clean architecture layer boundaries ────────────────
+    // Everything in Minimal + full layer boundary enforcement.
+{{#if (eq dependencyCruiserRules "recommended")}}
+    {
+      name: "no-circular",
+      severity: "error",
+      from: {},
+      to: { circular: true },
+    },
+    {
+      name: "clean-domain-is-isolated",
+      severity: "error",
+      comment: "Domain is the innermost layer and must not depend on any other layer.",
+      from: { path: "^src/domain(/|$)" },
+      to: {
+        path: [
+          "^src/shared(/|$)",
+          "^src/application(/|$)",
+          "^src/infrastructure(/|$)",
+          "^src/composition(/|$)",
+          "^src/presentation(/|$)",
+          "^src/main[.]ts$",
+        ],
+      },
+    },
+
+    // ── Shared layer ────────────────────────────────────────────────────────
+    {
+      name: "clean-shared-no-application",
+      severity: "error",
+      from: { path: "^src/shared(/|$)" },
+      to: { path: "^src/application(/|$)" },
+    },
+    {
+      name: "clean-shared-no-infrastructure",
+      severity: "error",
+      from: { path: "^src/shared(/|$)" },
+      to: { path: "^src/infrastructure(/|$)" },
+    },
+    {
+      name: "clean-shared-no-composition",
+      severity: "error",
+      from: { path: "^src/shared(/|$)" },
+      to: { path: "^src/composition(/|$)" },
+    },
+    {
+      name: "clean-shared-no-presentation",
+      severity: "error",
+      from: { path: "^src/shared(/|$)" },
+      to: { path: "^src/(presentation|main)[.]ts$" },
+    },
+
+    // ── Application layer ───────────────────────────────────────────────────
+    {
+      name: "clean-application-no-infrastructure",
+      severity: "error",
+      comment: "Use dependency inversion: define interfaces in domain, inject via composition.",
+      from: { path: "^src/application(/|$)" },
+      to: { path: "^src/infrastructure(/|$)" },
+    },
+    {
+      name: "clean-application-no-composition",
+      severity: "error",
+      from: { path: "^src/application(/|$)" },
+      to: { path: "^src/composition(/|$)" },
+    },
+    {
+      name: "clean-application-no-presentation",
+      severity: "error",
+      from: { path: "^src/application(/|$)" },
+      to: { path: "^src/(presentation|main)[.]ts$" },
+    },
+
+    // ── Infrastructure layer ────────────────────────────────────────────────
+    {
+      name: "clean-infrastructure-no-application",
+      severity: "error",
+      from: { path: "^src/infrastructure(/|$)" },
+      to: { path: "^src/application(/|$)" },
+    },
+    {
+      name: "clean-infrastructure-no-composition",
+      severity: "error",
+      from: { path: "^src/infrastructure(/|$)" },
+      to: { path: "^src/composition(/|$)" },
+    },
+    {
+      name: "clean-infrastructure-no-presentation",
+      severity: "error",
+      from: { path: "^src/infrastructure(/|$)" },
+      to: { path: "^src/(presentation|main)[.]ts$" },
+    },
+
+    // ── Composition layer ───────────────────────────────────────────────────
+    {
+      name: "clean-composition-no-presentation",
+      severity: "error",
+      from: { path: "^src/composition(/|$)" },
+      to: { path: "^src/(presentation|main)[.]ts$" },
+    },
+
+    // ── Presentation layer ──────────────────────────────────────────────────
+    {
+      name: "clean-presentation-no-infrastructure",
+      severity: "error",
+      comment: "Wire dependencies through the composition root instead.",
+      from: { path: "^src/(presentation|main)[.]ts$" },
+      to: { path: "^src/infrastructure(/|$)" },
+    },
+    {
+      name: "clean-presentation-no-application",
+      severity: "error",
+      comment: "Delegate to the composition root to access use cases.",
+      from: { path: "^src/(presentation|main)[.]ts$" },
+      to: { path: "^src/application(/|$)" },
+    },
+
+    // ── Quality rules ───────────────────────────────────────────────────────
+    {
+      name: "no-spec-imports",
+      severity: "error",
+      from: {},
+      to: { path: "[.](?:spec|test)[.](?:js|mjs|cjs|jsx|ts|mts|cts|tsx)$" },
+    },
+    {
+      name: "not-to-unresolvable",
+      severity: "error",
+      from: {},
+      to: { couldNotResolve: true },
+    },
+    {
+      name: "no-non-package-json",
+      severity: "error",
+      from: {},
+      to: { dependencyTypes: ["npm-no-pkg", "npm-unknown"] },
+    },
+{{/if}}
+
+    // ── Strict: full enforcement ────────────────────────────────────────────
+    // Everything in Recommended + orphans + deprecated + duplicate deps.
 {{#if (eq dependencyCruiserRules "strict")}}
     {
       name: "no-circular",
       severity: "error",
-      from: {},
+      comment: "Circular dependency detected. Use dependency inversion or ensure single responsibility.",
+      from: { pathNot: ["(^|/)index[.]ts$"] },
       to: { circular: true },
     },
     {
-      name: "no-layer-crossing",
+      name: "clean-domain-is-isolated",
       severity: "error",
-      from: { path: "src/domain" },
-      to: { path: "src/infrastructure" },
+      comment: "Domain is the innermost layer and must not depend on any other layer.",
+      from: { path: "^src/domain(/|$)" },
+      to: {
+        path: [
+          "^src/shared(/|$)",
+          "^src/application(/|$)",
+          "^src/infrastructure(/|$)",
+          "^src/composition(/|$)",
+          "^src/presentation(/|$)",
+          "^src/main[.]ts$",
+        ],
+      },
     },
-{{/if}}
-{{#if (eq dependencyCruiserRules "full")}}
+
+    // ── Shared layer ────────────────────────────────────────────────────────
     {
-      name: "no-circular",
+      name: "clean-shared-no-application",
+      severity: "error",
+      from: { path: "^src/shared(/|$)" },
+      to: { path: "^src/application(/|$)" },
+    },
+    {
+      name: "clean-shared-no-infrastructure",
+      severity: "error",
+      from: { path: "^src/shared(/|$)" },
+      to: { path: "^src/infrastructure(/|$)" },
+    },
+    {
+      name: "clean-shared-no-composition",
+      severity: "error",
+      from: { path: "^src/shared(/|$)" },
+      to: { path: "^src/composition(/|$)" },
+    },
+    {
+      name: "clean-shared-no-presentation",
+      severity: "error",
+      from: { path: "^src/shared(/|$)" },
+      to: { path: "^src/(presentation|main)[.]ts$" },
+    },
+
+    // ── Application layer ───────────────────────────────────────────────────
+    {
+      name: "clean-application-no-infrastructure",
+      severity: "error",
+      comment: "Use dependency inversion: define interfaces in domain, inject via composition.",
+      from: { path: "^src/application(/|$)" },
+      to: { path: "^src/infrastructure(/|$)" },
+    },
+    {
+      name: "clean-application-no-composition",
+      severity: "error",
+      from: { path: "^src/application(/|$)" },
+      to: { path: "^src/composition(/|$)" },
+    },
+    {
+      name: "clean-application-no-presentation",
+      severity: "error",
+      from: { path: "^src/application(/|$)" },
+      to: { path: "^src/(presentation|main)[.]ts$" },
+    },
+
+    // ── Infrastructure layer ────────────────────────────────────────────────
+    {
+      name: "clean-infrastructure-no-application",
+      severity: "error",
+      from: { path: "^src/infrastructure(/|$)" },
+      to: { path: "^src/application(/|$)" },
+    },
+    {
+      name: "clean-infrastructure-no-composition",
+      severity: "error",
+      from: { path: "^src/infrastructure(/|$)" },
+      to: { path: "^src/composition(/|$)" },
+    },
+    {
+      name: "clean-infrastructure-no-presentation",
+      severity: "error",
+      from: { path: "^src/infrastructure(/|$)" },
+      to: { path: "^src/(presentation|main)[.]ts$" },
+    },
+
+    // ── Composition layer ───────────────────────────────────────────────────
+    {
+      name: "clean-composition-no-presentation",
+      severity: "error",
+      from: { path: "^src/composition(/|$)" },
+      to: { path: "^src/(presentation|main)[.]ts$" },
+    },
+
+    // ── Presentation layer ──────────────────────────────────────────────────
+    {
+      name: "clean-presentation-no-infrastructure",
+      severity: "error",
+      comment: "Wire dependencies through the composition root instead.",
+      from: { path: "^src/(presentation|main)[.]ts$" },
+      to: { path: "^src/infrastructure(/|$)" },
+    },
+    {
+      name: "clean-presentation-no-application",
+      severity: "error",
+      comment: "Delegate to the composition root to access use cases.",
+      from: { path: "^src/(presentation|main)[.]ts$" },
+      to: { path: "^src/application(/|$)" },
+    },
+
+    // ── Quality rules ───────────────────────────────────────────────────────
+    {
+      name: "no-spec-imports",
       severity: "error",
       from: {},
-      to: { circular: true },
+      to: { path: "[.](?:spec|test)[.](?:js|mjs|cjs|jsx|ts|mts|cts|tsx)$" },
     },
     {
-      name: "no-layer-crossing",
+      name: "not-to-unresolvable",
       severity: "error",
-      from: { path: "src/domain" },
-      to: { path: "^(src/infrastructure|src/application)" },
+      from: {},
+      to: { couldNotResolve: true },
     },
     {
-      name: "no-domain-to-infrastructure",
+      name: "no-non-package-json",
       severity: "error",
-      from: { path: "src/domain" },
-      to: { path: "src/infrastructure" },
+      from: {},
+      to: { dependencyTypes: ["npm-no-pkg", "npm-unknown"] },
     },
     {
-      name: "no-infrastructure-to-domain",
-      severity: "error",
-      from: { path: "src/infrastructure" },
-      to: { path: "src/domain" },
+      name: "no-orphans",
+      severity: "warn",
+      comment: "Orphan module — likely unused. Use it or remove it.",
+      from: {
+        orphan: true,
+        pathNot: [
+          "(^|/)[.][^/]+[.](?:js|cjs|mjs|ts|cts|mts|json)$",
+          "[.]d[.]ts$",
+          "(^|/)tsconfig[.]json$",
+        ],
+      },
+      to: {},
+    },
+    {
+      name: "not-to-deprecated",
+      severity: "warn",
+      comment: "Deprecated npm module — upgrade or find an alternative.",
+      from: {},
+      to: { dependencyTypes: ["deprecated"] },
+    },
+    {
+      name: "no-duplicate-dep-types",
+      severity: "warn",
+      comment: "Package appears in multiple dependency sections. Consolidate.",
+      from: {},
+      to: {
+        moreThanOneDependencyType: true,
+        dependencyTypesNot: ["type-only"],
+      },
+    },
+    {
+      name: "no-deprecated-core",
+      severity: "warn",
+      comment: "Deprecated node core module — find an alternative.",
+      from: {},
+      to: {
+        dependencyTypes: ["core"],
+        path: [
+          "^async_hooks$",
+          "^punycode$",
+          "^domain$",
+          "^constants$",
+          "^sys$",
+        ],
+      },
     },
 {{/if}}
   ],
