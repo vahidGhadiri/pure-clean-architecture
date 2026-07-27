@@ -1,17 +1,16 @@
-import type { OrderItem, OrderDto } from './order.dto';
+import type { OrderStatus, OrderDto } from './order.dto';
 
 export interface CreateOrderData {
-    readonly customerName: string;
-    readonly items: OrderItem[];
+  readonly customerId: string;
+  readonly items: readonly { readonly productId: string; readonly quantity: number; readonly unitPrice: number }[];
 }
 
 export interface IOrderRepository {
-    create(
-        data: {
-            id: string;
-        } & CreateOrderData
-    ): Promise<OrderDto>;
-    findById(id: string): Promise<OrderDto>;
-    delete(id: string): Promise<void>;
-    findAll(): Promise<OrderDto[]>;
+  updateStatus(params: { pathParams: { id: string }; body: { status: OrderStatus } }): Promise<OrderDto>;
+  findByCustomerId(params: { pathParams: { customerId: string } }): Promise<OrderDto[]>;
+  findByStatus(params: { pathParams: { status: OrderStatus } }): Promise<OrderDto[]>;
+  findById(params: { pathParams: { id: string } }): Promise<OrderDto>;
+  delete(params: { pathParams: { id: string } }): Promise<void>;
+  create(params: { body: CreateOrderData }): Promise<OrderDto>;
+  findAll(): Promise<OrderDto[]>;
 }

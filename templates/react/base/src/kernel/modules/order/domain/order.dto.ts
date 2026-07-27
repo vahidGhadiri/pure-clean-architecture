@@ -1,17 +1,30 @@
-export interface OrderItem {
-    readonly productName: string;
-    readonly quantity: number;
-    readonly price: number;
+export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+
+export interface OrderItemDto {
+  readonly productId: string;
+  readonly quantity: number;
+  readonly unitPrice: number;
 }
 
 export interface CreateOrderDto {
-    readonly customerName: string;
-    readonly items: OrderItem[];
+  readonly customerId: string;
+  readonly items: readonly {
+    readonly productId: string;
+    readonly quantity: number;
+    readonly unitPrice: number;
+  }[];
+}
+
+export interface UpdateOrderStatusDto {
+  readonly id: string;
+  readonly status: OrderStatus;
 }
 
 export interface OrderDto {
-    readonly customerName: string;
-    readonly items: OrderItem[];
-    readonly total: number;
-    readonly id: string;
+  readonly items: readonly OrderItemDto[];
+  readonly status: OrderStatus;
+  readonly totalAmount: number;
+  readonly customerId: string;
+  readonly createdAt: string;
+  readonly id: string;
 }

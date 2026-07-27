@@ -1,47 +1,64 @@
 import type { IHttp } from '@shared_kernel/contracts';
 
-import type { IOrderRepository, CreateOrderData } from 'src/core/order/domain';
+import type { IOrderRepository } from '../domain';
 import type { OrderEndpoints } from './order.endpoints';
-import type { OrderDto } from '../domain/order.dto';
 
 export class OrderRepository implements IOrderRepository {
-    constructor(private readonly http: IHttp<typeof OrderEndpoints>) {}
+  constructor(private readonly http: IHttp<typeof OrderEndpoints>) {}
 
-    public async create(
-        data: {
-            id: string;
-        } & CreateOrderData
-    ): Promise<OrderDto> {
-        return this.http.request<'CREATE_ORDER', OrderDto>({
-            body: {
-                customerName: data.customerName,
-                items: data.items,
-            },
-            endpoint: 'CREATE_ORDER',
-            method: 'POST',
-        });
-    }
+  public create: IOrderRepository['create'] = async ({ body }) => {
+    return this.http.request({
+      endpoint: 'CREATE_ORDER',
+      method: 'POST',
+      body,
+    });
+  };
 
-    public async findById(id: string): Promise<OrderDto> {
-        return this.http.request<'GET_ORDER', OrderDto>({
-            endpoint: 'GET_ORDER',
-            pathParams: { id },
-            method: 'GET',
-        });
-    }
+  public updateStatus: IOrderRepository['updateStatus'] = async ({ pathParams, body }) => {
+    return this.http.request({
+      endpoint: 'UPDATE_ORDER_STATUS',
+      method: 'PATCH',
+      pathParams,
+      body,
+    });
+  };
 
-    public async delete(id: string): Promise<void> {
-        await this.http.request<'DELETE_ORDER', void>({
-            endpoint: 'DELETE_ORDER',
-            pathParams: { id },
-            method: 'DELETE',
-        });
-    }
+  public findByCustomerId: IOrderRepository['findByCustomerId'] = async ({ pathParams }) => {
+    return this.http.request({
+      endpoint: 'GET_ORDERS_BY_CUSTOMER',
+      method: 'GET',
+      pathParams,
+    });
+  };
 
-    public async findAll(): Promise<OrderDto[]> {
-        return this.http.request<'GET_ORDERS', OrderDto[]>({
-            endpoint: 'GET_ORDERS',
-            method: 'GET',
-        });
-    }
+  public findByStatus: IOrderRepository['findByStatus'] = async ({ pathParams }) => {
+    return this.http.request({
+      endpoint: 'GET_ORDERS_BY_STATUS',
+      method: 'GET',
+      pathParams,
+    });
+  };
+
+  public findById: IOrderRepository['findById'] = async ({ pathParams }) => {
+    return this.http.request({
+      endpoint: 'GET_ORDER',
+      method: 'GET',
+      pathParams,
+    });
+  };
+
+  public delete: IOrderRepository['delete'] = async ({ pathParams }) => {
+    return this.http.request({
+      endpoint: 'DELETE_ORDER',
+      method: 'DELETE',
+      pathParams,
+    });
+  };
+
+  public findAll: IOrderRepository['findAll'] = async () => {
+    return this.http.request({
+      endpoint: 'GET_ORDERS',
+      method: 'GET',
+    });
+  };
 }
