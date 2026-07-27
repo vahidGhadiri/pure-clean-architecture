@@ -1,5 +1,18 @@
-import { CreateOrderUseCase, GetOrdersUseCase, GetOrderUseCase } from './use-cases';
-import type { CreateOrderDto, OrderDto } from '../domain/order.dto';
+import {
+  GetOrdersByCustomerUseCase,
+  GetOrdersByStatusUseCase,
+  UpdateOrderStatusUseCase,
+  CreateOrderUseCase,
+  GetOrdersUseCase,
+  GetOrderUseCase,
+} from './use-cases';
 
-export { CreateOrderUseCase, GetOrdersUseCase, GetOrderUseCase };
-export type { CreateOrderDto, OrderDto };
+export {
+  GetOrdersByCustomerUseCase,
+  GetOrdersByStatusUseCase,
+  UpdateOrderStatusUseCase,
+  CreateOrderUseCase,
+  GetOrderUseCase,
+  GetOrdersUseCase,
+};
+export type { CreateOrderDto, UpdateOrderStatusDto, OrderDto, OrderStatus, OrderItemDto } from '../domain/order.dto';
