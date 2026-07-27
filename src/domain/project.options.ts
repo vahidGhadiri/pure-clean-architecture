@@ -6,7 +6,7 @@ export type DevelopmentTool = 'dependency-cruiser' | 'eslint';
 
 export type EslintStrictness = 'recommended' | 'minimal' | 'strict';
 
-export type DependencyCruiserRules = 'no-circular' | 'strict' | 'full';
+export type DependencyCruiserRules = 'minimal' | 'recommended' | 'strict';
 
 export interface ProjectOptions {
   dependencyCruiserRules?: DependencyCruiserRules;
