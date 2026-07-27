@@ -1,10 +1,10 @@
-export interface ContextConfig<TDependencies, TRepository, TServices> {
+export interface CompositionConfig<TDependencies, TRepository, TServices> {
     createRepository: (dependencies: TDependencies) => TRepository;
     createServices: (repository: TRepository) => TServices;
 }
 
-export function createContext<TDependencies, TRepository, TServices>(
-    config: ContextConfig<TDependencies, TRepository, TServices>
+export function createComposition<TDependencies, TRepository, TServices>(
+    config: CompositionConfig<TDependencies, TRepository, TServices>
 ): (dependencies: TDependencies) => TServices {
     return (dependencies: TDependencies): TServices => {
         const repository = config.createRepository(dependencies);

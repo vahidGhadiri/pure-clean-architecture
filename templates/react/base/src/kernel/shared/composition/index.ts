@@ -1,2 +1,2 @@
-export type { ContextConfig } from './create-context';
-export { createContext } from './create-context';
+export type { CompositionConfig } from './create-composition';
+export { createComposition } from './create-composition';
