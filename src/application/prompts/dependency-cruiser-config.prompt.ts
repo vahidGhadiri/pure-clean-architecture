@@ -6,19 +6,19 @@ export async function dependencyCruiserConfigPrompt(): Promise<DependencyCruiser
   const rules = await select({
     options: [
       {
-        hint: 'Only block circular imports (recommended)',
-        label: 'No circular dependencies',
-        value: 'no-circular',
+        hint: 'Domain isolation, no circular imports, no spec imports',
+        label: 'Minimal',
+        value: 'minimal',
       },
       {
-        hint: 'Enforce clean architecture layer rules',
-        label: 'Strict layering',
+        hint: 'All clean architecture layer boundaries enforced (Recommended)',
+        label: 'Recommended',
+        value: 'recommended',
+      },
+      {
+        hint: 'Layer boundaries + orphans + deprecated + all quality rules',
+        label: 'Strict',
         value: 'strict',
-      },
-      {
-        hint: 'All rules enabled, maximum enforcement',
-        label: 'Full ruleset',
-        value: 'full',
       },
     ],
     message: 'Select Dependency Cruiser rule set',

@@ -19,7 +19,7 @@ import {
 const VALID_MANAGERS: PackageManager[] = ['pnpm', 'yarn', 'npm'];
 const VALID_TOOLS: DevelopmentTool[] = ['eslint', 'dependency-cruiser'];
 const VALID_ESLINT: EslintStrictness[] = ['recommended', 'minimal', 'strict'];
-const VALID_DEP_CRUISER: DependencyCruiserRules[] = ['no-circular', 'strict', 'full'];
+const VALID_DEP_CRUISER: DependencyCruiserRules[] = ['minimal', 'recommended', 'strict'];
 
 function validateEnum<T extends string>(value: string, valid: T[], label: string): T {
   if (!valid.includes(value as T)) {

@@ -14,7 +14,7 @@ export const createInitCommand = () => {
     .option('-m, --manager <manager>', 'Package manager (pnpm, npm, yarn)')
     .option('-t, --tools <tools>', 'Dev tools (comma-separated: eslint, dependency-cruiser)')
     .option('--eslint-strictness <level>', 'ESLint config (recommended, minimal, strict)')
-    .option('--dep-cruiser-rules <rules>', 'Dependency Cruiser rules (no-circular, strict, full)')
+    .option('--dep-cruiser-rules <rules>', 'Dependency Cruiser rules (minimal, recommended, strict)')
     .action(async (flags: CliFlags) => {
       try {
         const handler = createInitHandler();
