@@ -1,1 +1,1 @@
-export { useOrders } from './use-get-orders';
+export { useGetOrdersQuery } from './use-get-orders.query';

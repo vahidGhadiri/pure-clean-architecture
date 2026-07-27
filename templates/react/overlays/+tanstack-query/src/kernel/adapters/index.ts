@@ -1,12 +1,7 @@
-export { useCreateAccount, useUpdateAccount } from './account/commands';
-export { useAccounts } from './account/queries';
+export { useCreateUserCommand, useUpdateUserCommand } from './user/commands';
+export { useGetUsersQuery } from './user/queries';
+export { useUserBoundedContext } from './user';
 
-export { useCreateProduct, useUpdateProduct } from './product/commands';
-export { useProducts } from './product/queries';
-
-export { useCreateOrder } from './order/commands';
-export { useOrders } from './order/queries';
-
-export { useAccountContext } from './account';
-export { useProductContext } from './product';
-export { useOrderContext } from './order';
+export { useCreateOrderCommand, useUpdateOrderStatusCommand } from './order/commands';
+export { useGetOrdersQuery } from './order/queries';
+export { useOrderBoundedContext } from './order';

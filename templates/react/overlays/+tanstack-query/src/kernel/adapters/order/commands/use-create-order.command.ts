@@ -1,13 +1,13 @@
-import { useQueryClient, useMutation } from '@tanstack/react-query';
 import type { CreateOrderDto, OrderDto } from '@modules/order';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 
-import { useOrderContext } from '../..';
+import { useOrderBoundedContext } from '../..';
 
 const ORDER_QUERY_KEY = ['orders'];
 
-export function useCreateOrder() {
+export function useCreateOrderCommand() {
     const queryClient = useQueryClient();
-    const { createOrder } = useOrderContext();
+    const { createOrder } = useOrderBoundedContext();
 
     return useMutation({
         onSuccess: () => {
