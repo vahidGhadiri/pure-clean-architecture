@@ -15,6 +15,7 @@ export const createInitCommand = () => {
     .option('-t, --tools <tools>', 'Dev tools (comma-separated: eslint, dependency-cruiser)')
     .option('--eslint-strictness <level>', 'ESLint config (recommended, minimal, strict)')
     .option('--dep-cruiser-rules <rules>', 'Dependency Cruiser rules (minimal, recommended, strict)')
+    .option('--auth-routing <auth-routing>', 'Auth routing (protected, none)')
     .action(async (flags: CliFlags) => {
       try {
         const handler = createInitHandler();

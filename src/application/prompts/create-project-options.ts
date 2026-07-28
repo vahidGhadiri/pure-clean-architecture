@@ -6,12 +6,14 @@ import type {
   DevelopmentTool,
   PackageManager,
   ProjectOptions,
+  AuthRouting,
   CliFlags,
 } from '../../domain/project.options.js';
 import {
   dependencyCruiserConfigPrompt,
   packageManagerPrompt,
   eslintConfigPrompt,
+  authRoutingPrompt,
   projectPrompt,
   toolsPrompt,
 } from './index.js';
@@ -20,6 +22,7 @@ const VALID_MANAGERS: PackageManager[] = ['pnpm', 'yarn', 'npm'];
 const VALID_TOOLS: DevelopmentTool[] = ['eslint', 'dependency-cruiser'];
 const VALID_ESLINT: EslintStrictness[] = ['recommended', 'minimal', 'strict'];
 const VALID_DEP_CRUISER: DependencyCruiserRules[] = ['minimal', 'recommended', 'strict'];
+const VALID_AUTH_ROUTING: AuthRouting[] = ['protected', 'none'];
 
 function validateEnum<T extends string>(value: string, valid: T[], label: string): T {
   if (!valid.includes(value as T)) {
@@ -70,6 +73,17 @@ export async function createProjectOptions(flags?: CliFlags): Promise<ProjectOpt
     packageManager = pm;
   }
 
+  let authRouting: AuthRouting;
+  if (flags?.authRouting) {
+    authRouting = validateEnum(flags.authRouting, VALID_AUTH_ROUTING, 'auth routing');
+  } else {
+    const auth = await authRoutingPrompt();
+    if (isCancel(auth)) {
+      throw new Error('Project creation cancelled');
+    }
+    authRouting = auth;
+  }
+
   let tools: DevelopmentTool[];
   if (flags?.tools) {
     tools = parseTools(flags.tools);
@@ -109,6 +123,7 @@ export async function createProjectOptions(flags?: CliFlags): Promise<ProjectOpt
     eslintStrictness,
     targetDirectory,
     packageManager,
+    authRouting,
     projectName,
     tools,
   };
