@@ -3,6 +3,7 @@ export { createProjectOptions } from './create-project-options.js';
 export { packageManagerPrompt } from './package-manager.prompt.js';
 export { installDependenciesPrompt } from './install.prompt.js';
 export { eslintConfigPrompt } from './eslint-config.prompt.js';
+export { authRoutingPrompt } from './auth-routing.prompt.js';
 export { projectPrompt } from './project.prompt.js';
 export { runDevPrompt } from './run-dev.prompt.js';
 export { toolsPrompt } from './tools.prompt.js';
