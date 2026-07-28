@@ -32,7 +32,7 @@ export default class Http<TEndpoints extends Record<string, string>> implements 
         },
         options: Partial<HttpOptions> = {}
     ): Promise<TResponse> {
-        const { responseBuilder, headersBuilder, errorHandler, urlBuilder } = this.dependencies;
+        const { responseBuilder, headersBuilder, errorHandler, urlBuilder, interceptorManager } = this.dependencies;
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), options.timeout ?? this.config.timeout);
@@ -47,27 +47,42 @@ export default class Http<TEndpoints extends Record<string, string>> implements 
 
             const headers = headersBuilder.reset().merge(this.config.defaultHeaders).merge(options.headers).build();
 
-            const requestConfig = this.buildRequestConfig({
-                isMultipart: options.isMultipart,
-                signal: controller.signal,
-                requestBody: params.body,
-                method: params.method,
+            const interceptedRequest = await interceptorManager.runRequest({
                 headers,
+                signal: controller.signal,
+                method: params.method,
+                url,
+                body: params.body,
             });
 
-            const response = await fetch(url, requestConfig);
+            const requestConfig = this.buildRequestConfig({
+                isMultipart: options.isMultipart,
+                signal: interceptedRequest.signal,
+                requestBody: interceptedRequest.body,
+                method: interceptedRequest.method,
+                headers: interceptedRequest.headers,
+            });
+
+            const response = await fetch(interceptedRequest.url, requestConfig);
             errorHandler.ensureSuccess(response);
 
             const body = await this.parseResponse(response, options.responseType ?? this.config.responseType);
 
-            const result = responseBuilder.build<TResponse>(body);
+            const interceptedResponse = await interceptorManager.runResponse({
+                status: response.status,
+                body,
+                headers: response.headers,
+            });
+
+            const result = responseBuilder.build<TResponse>(interceptedResponse.body);
             if (!result.success) {
                 throw result.error;
             }
 
             return result.data as TResponse;
         } catch (error) {
-            throw errorHandler.handle(error);
+            const handledError = await interceptorManager.runError(error);
+            throw errorHandler.handle(handledError);
         } finally {
             clearTimeout(timeoutId);
         }
