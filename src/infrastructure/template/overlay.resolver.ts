@@ -13,6 +13,11 @@ export function resolveOverlays(options: ProjectOptions, templateBasePath: strin
 
   return [
     {
+      condition: options.authRouting === 'protected',
+      path: path.join(overlaysDir, '+auth-routing'),
+      name: '+auth-routing',
+    },
+    {
       condition: options.stateManagement === 'tanstack-query',
       path: path.join(overlaysDir, '+tanstack-query'),
       name: '+tanstack-query',

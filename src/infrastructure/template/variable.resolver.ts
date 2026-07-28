@@ -21,6 +21,7 @@ export function resolveTemplateVariables(options: ProjectOptions, extra?: Record
     author: process.env.GIT_AUTHOR_NAME || process.env.USER || 'unknown',
     stateManagement: stateManagementLabels[options.stateManagement],
     tanstackQuery: options.stateManagement === 'tanstack-query',
+    authRouting: options.authRouting === 'protected',
     dependencyCruiserRules: options.dependencyCruiserRules,
     eslintStrictness: options.eslintStrictness,
     packageManager: options.packageManager,
