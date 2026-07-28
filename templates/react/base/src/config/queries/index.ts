@@ -1,0 +1,1 @@
+const DEFAULT_QUERY_CLIENT = {};
